@@ -41,6 +41,7 @@ public enum EventPriority implements IEventListener
     LOW,
     LOWEST; //Last to execute
 
+    public static final int VALUES_LENGTH = values().length;
 
     @Override
     public void invoke(Event event)
