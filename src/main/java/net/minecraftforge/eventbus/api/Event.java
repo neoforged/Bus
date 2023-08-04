@@ -21,6 +21,7 @@ package net.minecraftforge.eventbus.api;
 
 import net.minecraftforge.eventbus.EventSubclassTransformer;
 import net.minecraftforge.eventbus.ListenerList;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,6 +61,7 @@ public class Event
      * Note:
      * Events with the Cancelable annotation will have this method automatically added to return true.
      */
+    @ApiStatus.NonExtendable // ASM transformer will override this method
     public boolean isCancelable()
     {
         return EventListenerHelper.isCancelable(this.getClass());
@@ -101,6 +103,7 @@ public class Event
      * Note:
      * Events with the HasResult annotation will have this method automatically added to return true.
      */
+    @ApiStatus.NonExtendable // ASM transformer will override this method
     public boolean hasResult()
     {
         return EventListenerHelper.hasResult(this.getClass());
@@ -137,6 +140,7 @@ public class Event
      *
      * @return Listener List
      */
+    @ApiStatus.Internal
     public ListenerList getListenerList()
     {
         return EventListenerHelper.getListenerListInternal(this.getClass(), true);
