@@ -59,7 +59,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         this.trackPhases = true;
         this.baseType = Event.class;
         this.checkTypesOnDispatch = checkTypesOnDispatchProperty;
-        this.factory = new ClassLoaderFactory();
+        this.factory = new LMFListenerFactory();
     }
 
     private EventBus(final IEventExceptionHandler handler, boolean trackPhase, boolean startShutdown, Class<?> baseType, boolean checkTypesOnDispatch, IEventListenerFactory factory) {
@@ -76,7 +76,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.trackPhases, busBuilder.startShutdown,
              busBuilder.markerType, busBuilder.checkTypesOnDispatch,
-             busBuilder.lambdaMetaFactory ? new LMFListenerFactory() : busBuilder.modLauncher ? new ModLauncherFactory() : new ClassLoaderFactory());
+             new LMFListenerFactory());
     }
 
     private void registerClass(final Class<?> clazz) {

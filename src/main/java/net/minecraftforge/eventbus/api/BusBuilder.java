@@ -17,9 +17,11 @@ public interface BusBuilder {
     BusBuilder checkTypesOnDispatch();
     BusBuilder markerType(Class<?> type);
 
-    /* Use ModLauncher hooks when creating ASM handlers. */
-    BusBuilder useModLauncher();
-    BusBuilder useLambdaMetaFactory();
+    /** @deprecated Does not have an effect anymore. */
+    @Deprecated(forRemoval = true)
+    default BusBuilder useModLauncher() {
+        return this;
+    }
 
     IEventBus build();
 }

@@ -15,9 +15,7 @@ import org.openjdk.jmh.annotations.State;
 public class EventBusBenchmark {
     private static final String ARMS_LENGTH = "net.minecraftforge.eventbus.benchmarks.compiled.BenchmarkArmsLength";
 
-    private Object LMF;
     private Object ModLauncher;
-    private Object ClassLoader;
     private Consumer<Object> postStatic;
     private Consumer<Object> postDynamic;
     private Consumer<Object> postLambda;
@@ -32,9 +30,7 @@ public class EventBusBenchmark {
         BootstrapLauncher.main("--version", "1.0", "--launchTarget", "testharness");
 
         Class<?> cls = Class.forName(ARMS_LENGTH, false, Thread.currentThread().getContextClassLoader());
-        LMF          = cls.getField("LMF").get(null);
         ModLauncher  = cls.getField("ModLauncher").get(null);
-        ClassLoader  = cls.getField("ClassLoader").get(null);
         postStatic   = (Consumer<Object>)cls.getField("postStatic").get(null);
         postDynamic  = (Consumer<Object>)cls.getField("postDynamic").get(null);
         postLambda   = (Consumer<Object>)cls.getField("postLambda").get(null);
@@ -45,31 +41,6 @@ public class EventBusBenchmark {
         public static ServiceRunner supplier() {
             return () -> BenchmarkArmsLength.supplier().run();
         }
-    }
-
-    // LambdaMetaFactory "ASM" Factory
-    @Benchmark
-    public int testLMFDynamic() throws Throwable {
-        postDynamic.accept(LMF);
-        return 0;
-    }
-
-    @Benchmark
-    public int testLMFLambda() throws Throwable {
-        postLambda.accept(LMF);
-        return 0;
-    }
-
-    @Benchmark
-    public int testLMFStatic() throws Throwable {
-        postStatic.accept(LMF);
-        return 0;
-    }
-
-    @Benchmark
-    public int testLMFCombined() throws Throwable {
-        postCombined.accept(LMF);
-        return 0;
     }
 
     // ModLauncher ASM Factory
@@ -94,31 +65,6 @@ public class EventBusBenchmark {
     @Benchmark
     public int testModLauncherCombined() throws Throwable {
         postCombined.accept(ModLauncher);
-        return 0;
-    }
-
-    // ClassLoader ASM Factory
-    @Benchmark
-    public int testClassLoaderDynamic() throws Throwable {
-        postDynamic.accept(ClassLoader);
-        return 0;
-    }
-
-    @Benchmark
-    public int testClassLoaderLambda() throws Throwable {
-        postLambda.accept(ClassLoader);
-        return 0;
-    }
-
-    @Benchmark
-    public int testClassLoaderStatic() throws Throwable {
-        postStatic.accept(ClassLoader);
-        return 0;
-    }
-
-    @Benchmark
-    public int testClassLoaderCombined() throws Throwable {
-        postCombined.accept(ClassLoader);
         return 0;
     }
 }

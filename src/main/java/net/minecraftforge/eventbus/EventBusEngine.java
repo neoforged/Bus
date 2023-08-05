@@ -7,25 +7,16 @@ import org.objectweb.asm.tree.ClassNode;
 
 public final class EventBusEngine implements IEventBusEngine {
     private final EventSubclassTransformer eventTransformer;
-    private final EventAccessTransformer accessTransformer;
     final String EVENT_CLASS = "net.minecraftforge.eventbus.api.Event";
 
     public EventBusEngine() {
         LogManager.getLogger().debug(LogMarkers.EVENTBUS, "Loading EventBus transformers");
         this.eventTransformer = new EventSubclassTransformer();
-        this.accessTransformer = new EventAccessTransformer();
     }
 
     @Override
     public int processClass(final ClassNode classNode, final Type classType) {
-        if (ModLauncherFactory.hasPendingWrapperClass(classType.getClassName())) {
-            ModLauncherFactory.processWrapperClass(classType.getClassName(), classNode);
-            LogManager.getLogger().debug(LogMarkers.EVENTBUS, "Built transformed event wrapper class {}", classType.getClassName());
-            return ClassWriter.COMPUTE_FRAMES;
-        }
-        final int evtXformFlags = eventTransformer.transform(classNode, classType).isPresent() ? ClassWriter.COMPUTE_FRAMES : 0x0;
-        final int axXformFlags = accessTransformer.transform(classNode, classType) ? 0x100 : 0;
-        return evtXformFlags | axXformFlags;
+        return eventTransformer.transform(classNode, classType).isPresent() ? ClassWriter.COMPUTE_FRAMES : 0x0;
     }
 
     @Override
@@ -36,6 +27,6 @@ public final class EventBusEngine implements IEventBusEngine {
 
     @Override
     public boolean findASMEventDispatcher(final Type classType) {
-        return ModLauncherFactory.hasPendingWrapperClass(classType.getClassName());
+        return false;
     }
 }
