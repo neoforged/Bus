@@ -23,7 +23,7 @@ public class TestModLauncherBase {
     }
 
     BusBuilder builder() {
-        return BusBuilder.builder().useModLauncher();
+        return BusBuilder.builder().useLambdaMetaFactory();
     }
 
     @BeforeEach

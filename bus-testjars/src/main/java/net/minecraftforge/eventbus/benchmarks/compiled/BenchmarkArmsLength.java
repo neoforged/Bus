@@ -44,11 +44,18 @@ public class BenchmarkArmsLength
                 BusBuilder.builder().build(),
                 BusBuilder.builder().build()
             ).register();
+            LMF = new Bus(
+                BusBuilder.builder().useLambdaMetaFactory().build(),
+                BusBuilder.builder().useLambdaMetaFactory().build(),
+                BusBuilder.builder().useLambdaMetaFactory().build(),
+                BusBuilder.builder().useLambdaMetaFactory().build()
+            ).register();
         };
     }
 
     public static Bus ModLauncher;
     public static Bus ClassLoader;
+    public static Bus LMF;
     public static Bus NoLoader = new Bus(
         BusBuilder.builder().build(),
         BusBuilder.builder().build(),

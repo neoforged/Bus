@@ -19,6 +19,7 @@ public interface BusBuilder {
 
     /* Use ModLauncher hooks when creating ASM handlers. */
     BusBuilder useModLauncher();
+    BusBuilder useLambdaMetaFactory();
 
     IEventBus build();
 }

@@ -15,6 +15,7 @@ public final class BusBuilderImpl implements BusBuilder {
     boolean checkTypesOnDispatch = false;
     Class<?> markerType = Event.class;
     boolean modLauncher = false;
+    boolean lambdaMetaFactory = false;
 
     @Override
     public BusBuilder setTrackPhases(boolean trackPhases) {
@@ -50,6 +51,12 @@ public final class BusBuilderImpl implements BusBuilder {
     @Override
     public BusBuilder useModLauncher() {
         this.modLauncher = true;
+        return this;
+    }
+
+    @Override
+    public BusBuilder useLambdaMetaFactory() {
+        this.lambdaMetaFactory = true;
         return this;
     }
 
