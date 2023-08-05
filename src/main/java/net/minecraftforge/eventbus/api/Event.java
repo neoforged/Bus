@@ -60,8 +60,7 @@ public class Event
      * Note:
      * Events with the Cancelable annotation will have this method automatically added to return true.
      */
-    @ApiStatus.NonExtendable // ASM transformer will override this method
-    public boolean isCancelable()
+    public final boolean isCancelable()
     {
         return EventAnnotationHelper.isCancelable(this.getClass());
     }
@@ -102,8 +101,7 @@ public class Event
      * Note:
      * Events with the HasResult annotation will have this method automatically added to return true.
      */
-    @ApiStatus.NonExtendable // ASM transformer will override this method
-    public boolean hasResult()
+    public final boolean hasResult()
     {
         return EventAnnotationHelper.hasResult(this.getClass());
     }
