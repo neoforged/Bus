@@ -1,9 +1,7 @@
 package net.minecraftforge.eventbus.test.general;
 
-import net.minecraftforge.eventbus.ListenerList;
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventListenerHelper;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.test.ITestHandler;
@@ -46,14 +44,7 @@ public class AbstractEventListenerTest implements ITestHandler {
     public static abstract class AbstractSuperEvent extends Event {}
 
     public static class ConcreteSuperEvent extends AbstractSuperEvent {
-        private static ListenerList LISTENERS = new ListenerList(EventListenerHelper.getListenerList(ConcreteSuperEvent.class.getSuperclass()));
         public ConcreteSuperEvent() {}
-
-        @Override
-        public ListenerList getListenerList()
-        {
-            return LISTENERS;
-        }
     }
 
     // In transformed world, this will have a 'LISTENER_LIST' injected.
@@ -63,15 +54,7 @@ public class AbstractEventListenerTest implements ITestHandler {
     }
 
     public static class ConcreteSubEvent extends AbstractSubEvent {
-        private static ListenerList LISTENERS = new ListenerList(EventListenerHelper.getListenerList(ConcreteSubEvent.class.getSuperclass()));
-
         public ConcreteSubEvent() {}
-
-        @Override
-        public ListenerList getListenerList()
-        {
-            return LISTENERS;
-        }
     }
 
 }

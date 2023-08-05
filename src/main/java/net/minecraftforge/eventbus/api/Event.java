@@ -19,8 +19,7 @@
 
 package net.minecraftforge.eventbus.api;
 
-import net.minecraftforge.eventbus.EventSubclassTransformer;
-import net.minecraftforge.eventbus.ListenerList;
+import net.minecraftforge.eventbus.EventAnnotationHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +63,7 @@ public class Event
     @ApiStatus.NonExtendable // ASM transformer will override this method
     public boolean isCancelable()
     {
-        return EventListenerHelper.isCancelable(this.getClass());
+        return EventAnnotationHelper.isCancelable(this.getClass());
     }
 
     /**
@@ -106,7 +105,7 @@ public class Event
     @ApiStatus.NonExtendable // ASM transformer will override this method
     public boolean hasResult()
     {
-        return EventListenerHelper.hasResult(this.getClass());
+        return EventAnnotationHelper.hasResult(this.getClass());
     }
 
     /**
@@ -128,22 +127,6 @@ public class Event
     public void setResult(Result value)
     {
         result = value;
-    }
-
-    /**
-     * Returns a ListenerList object that contains all listeners
-     * that are registered to this event.
-     *
-     * Note: for better efficiency, this gets overridden automatically
-     * using a Transformer, there is no need to override it yourself.
-     * @see EventSubclassTransformer
-     *
-     * @return Listener List
-     */
-    @ApiStatus.Internal
-    public ListenerList getListenerList()
-    {
-        return EventListenerHelper.getListenerListInternal(this.getClass(), true);
     }
 
     @Nullable

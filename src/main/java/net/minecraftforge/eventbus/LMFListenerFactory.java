@@ -18,6 +18,7 @@ public class LMFListenerFactory implements IEventListenerFactory {
             hackfield.setAccessible(true);
             IMPL_LOOKUP = (MethodHandles.Lookup) hackfield.get(null);
         } catch (Exception e) {
+            // TODO: if this fails I suppose we could fall back to a slower methodhandle invoke
             throw new RuntimeException("Failed to access IMPL_LOOKUP...");
         }
     }

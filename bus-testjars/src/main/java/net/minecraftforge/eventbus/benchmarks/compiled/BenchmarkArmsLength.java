@@ -26,11 +26,11 @@ public class BenchmarkArmsLength
 
     public static Runnable supplier() {
         return () -> {
-            try {
-                CancelableEvent.class.getDeclaredField("LISTENER_LIST");
-            } catch (Exception e) {
-                throw new RuntimeException("Transformer did not apply!", e);
-            }
+//            try {
+//                CancelableEvent.class.getDeclaredField("LISTENER_LIST");
+//            } catch (Exception e) {
+//                throw new RuntimeException("Transformer did not apply!", e);
+//            }
 
             ModLauncher = new Bus(
                 BusBuilder.builder().build(),

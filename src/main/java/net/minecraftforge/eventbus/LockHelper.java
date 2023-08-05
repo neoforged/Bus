@@ -27,7 +27,7 @@ public class LockHelper<K,V> {
         this.backingMap = mapConstructor.apply(0);
     }
 
-    private Map<K, V> getReadMap() {
+    public Map<K, V> getReadMap() {
         var map = readOnlyView;
         if (map == null) {
             // Need to update the read map

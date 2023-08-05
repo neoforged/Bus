@@ -18,8 +18,6 @@ public class TestModLauncherBase {
     private static final String METHOD_NAME = "test.modlauncher.method";
 
     void validate(Class<?> clazz) {
-        // We expect transformers to run, so make sure LISTENER_LIST exists, as it's the best indicator
-        assertTrue(Whitebox.hasField(clazz, "LISTENER_LIST"), "EventSubclassTransformer did not run on " + clazz.getName());
     }
 
     BusBuilder builder() {

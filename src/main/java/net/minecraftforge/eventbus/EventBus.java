@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -39,12 +38,11 @@ import static net.minecraftforge.eventbus.LogMarkers.EVENTBUS;
 public class EventBus implements IEventExceptionHandler, IEventBus {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final boolean checkTypesOnDispatchProperty = Boolean.parseBoolean(System.getProperty("eventbus.checkTypesOnDispatch", "false"));
-    private static AtomicInteger maxID = new AtomicInteger(0);
     private final boolean trackPhases;
 
 
+    private final LockHelper<Class<?>, ListenerList> listenerLists = new LockHelper<>(IdentityHashMap::new);
     private ConcurrentHashMap<Object, List<IEventListener>> listeners = new ConcurrentHashMap<>();
-    private final int busID = maxID.getAndIncrement();
     private final IEventExceptionHandler exceptionHandler;
     private volatile boolean shutdown = false;
 
@@ -54,7 +52,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     @SuppressWarnings("unused")
     private EventBus() {
-        ListenerList.resize(busID + 1);
         exceptionHandler = this;
         this.trackPhases = true;
         this.baseType = Event.class;
@@ -63,7 +60,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     private EventBus(final IEventExceptionHandler handler, boolean trackPhase, boolean startShutdown, Class<?> baseType, boolean checkTypesOnDispatch, IEventListenerFactory factory) {
-        ListenerList.resize(busID + 1);
         if (handler == null) exceptionHandler = this;
         else exceptionHandler = handler;
         this.trackPhases = trackPhase;
@@ -273,10 +269,17 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     private void addToListeners(final Object target, final Class<?> eventType, final IEventListener listener, final EventPriority priority) {
-        ListenerList listenerList = EventListenerHelper.getListenerList(eventType);
-        listenerList.register(busID, priority, listener);
+        getOrComputeListenerListInst(eventType).register(priority, listener);
         List<IEventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
         others.add(listener);
+    }
+
+    private ListenerList getOrComputeListenerListInst(Class<?> eventType) {
+        if (eventType == Event.class) {
+            return listenerLists.computeIfAbsent(eventType, ListenerList::new);
+        } else {
+            return listenerLists.computeIfAbsent(eventType, () -> new ListenerList(getOrComputeListenerListInst(eventType.getSuperclass())));
+        }
     }
 
     @Override
@@ -287,7 +290,10 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             return;
         for (IEventListener listener : list)
         {
-            ListenerList.unregisterAll(busID, listener);
+            for (ListenerList listenerList : listenerLists.getReadMap().values())
+            {
+                listenerList.unregister(listener);
+            }
         }
     }
 
@@ -305,7 +311,13 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalArgumentException("Cannot post event of type " + event.getClass().getSimpleName() + " to this event. Must match type: " + baseType.getSimpleName());
         }
 
-        IEventListener[] listeners = event.getListenerList().getListeners(busID);
+        ListenerList listenerList = listenerLists.get(event.getClass());
+        if (listenerList == null) {
+            // Parent might have a listener, so we must create the list!
+            listenerList = getOrComputeListenerListInst(event.getClass());
+        }
+
+        IEventListener[] listeners = listenerList.getListeners();
         int index = 0;
         try
         {
@@ -332,7 +344,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     @Override
     public void shutdown()
     {
-        LOGGER.fatal(EVENTBUS, "EventBus {} shutting down - future events will not be posted.", busID, new Exception("stacktrace"));
+        LOGGER.fatal(EVENTBUS, "EventBus shutting down - future events will not be posted.", new Exception("stacktrace"));
         this.shutdown = true;
     }
 
