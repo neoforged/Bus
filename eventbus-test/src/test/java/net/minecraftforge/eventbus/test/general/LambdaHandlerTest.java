@@ -3,7 +3,6 @@ package net.minecraftforge.eventbus.test.general;
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.test.ITestHandler;
 
@@ -84,7 +83,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
     }
 
     public <T extends Event> void registerSomeGodDamnWrapper(IEventBus bus, Class<T> tClass, Function<T, Boolean> func) {
-        bus.addListener(EventPriority.NORMAL, false, tClass, (T event) -> {
+        bus.addListener(tClass, (T event) -> {
             if (func.apply(event)) {
                 event.setCanceled(true);
             }
