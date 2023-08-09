@@ -322,6 +322,40 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
+    public void postPhase(EventPriority phase, Event event) {
+        Objects.requireNonNull(phase);
+
+        if (shutdown) return;
+        if (checkTypesOnDispatch && !eventFilter.test(event.getClass()))
+        {
+            throw new IllegalArgumentException("Cannot post event of type " + event.getClass().getSimpleName() + " to this bus: " + errorMessageSupplier.apply(event.getClass()));
+        }
+
+        IEventListener[] listeners = event.getListenerList().getListeners(busID);
+        int index = 0;
+        try
+        {
+            // Find listeners after phase
+            while (index < listeners.length) {
+                if (listeners[index++] == phase) {
+                    break;
+                }
+            }
+            // Loop until end of phase
+            for (; index < listeners.length; index++)
+            {
+                if (Objects.equals(listeners[index].getClass(), EventPriority.class)) break;
+                listeners[index].invoke(event);
+            }
+        }
+        catch (Throwable throwable)
+        {
+            exceptionHandler.handleException(this, event, listeners, index, throwable);
+            throw throwable;
+        }
+    }
+
+    @Override
     public void handleException(IEventBus bus, Event event, IEventListener[] listeners, int index, Throwable throwable)
     {
         LOGGER.error(EVENTBUS, ()->new EventBusErrorMessage(event, index, listeners, throwable));

@@ -157,6 +157,15 @@ public interface IEventBus {
     boolean post(Event event, IEventBusInvokeDispatcher wrapper);
 
     /**
+     * Submit the event for dispatch to listeners that registered to a specific phase.
+     * {@link #post(Event)} should be preferred unless you know what you are doing.
+     *
+     * @param phase The phase for which the listeners should be invoked
+     * @param event The event to dispatch to listeners
+     */
+    void postPhase(EventPriority phase, Event event);
+
+    /**
      * Shuts down this event bus.
      *
      * No future events will be fired on this event bus, so any call to {@link #post(Event)} will be a no op after this method has been invoked

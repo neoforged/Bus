@@ -14,6 +14,7 @@ import net.minecraftforge.eventbus.test.general.NonPublicEventHandler;
 import net.minecraftforge.eventbus.test.general.ParallelEventTest;
 import net.minecraftforge.eventbus.test.general.ParentHandlersGetInvokedTest;
 import net.minecraftforge.eventbus.test.general.ParentHandlersGetInvokedTestDummy;
+import net.minecraftforge.eventbus.test.general.PostPhaseTest;
 import net.minecraftforge.eventbus.test.general.ThreadedListenerExceptionTest;
 
 import org.junit.jupiter.api.Disabled;
@@ -89,6 +90,11 @@ public class TestModLauncher extends TestModLauncherBase {
     @Test
     public void parentHandlerGetsInvokedDummy() {
         doTest(new ParentHandlersGetInvokedTestDummy() {});
+    }
+
+    @Test
+    public void postPhase() {
+        doTest(new PostPhaseTest() {});
     }
 
     @RepeatedTest(100)
