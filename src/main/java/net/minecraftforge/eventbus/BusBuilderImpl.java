@@ -1,5 +1,8 @@
 package net.minecraftforge.eventbus;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -13,7 +16,8 @@ public final class BusBuilderImpl implements BusBuilder {
     boolean trackPhases = true;
     boolean startShutdown = false;
     boolean checkTypesOnDispatch = false;
-    Class<?> markerType = Event.class;
+    Predicate<Class<? extends Event>> eventFilter = eventClass -> true;
+    Function<Class<? extends Event>, String> errorMessageSupplier = eventClass -> "Unreachable";
     boolean modLauncher = false;
 
     @Override
@@ -41,9 +45,9 @@ public final class BusBuilderImpl implements BusBuilder {
     }
 
     @Override
-    public BusBuilder markerType(Class<?> type) {
-        if (!type.isInterface()) throw new IllegalArgumentException("Cannot specify a class marker type");
-        this.markerType = type;
+    public BusBuilder eventClassFilter(Predicate<Class<? extends Event>> filter, Function<Class<? extends Event>, String> errorMessageSupplier) {
+        this.eventFilter = filter;
+        this.errorMessageSupplier = errorMessageSupplier;
         return this;
     }
 

@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static net.minecraftforge.eventbus.LogMarkers.EVENTBUS;
@@ -48,34 +49,31 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     private final IEventExceptionHandler exceptionHandler;
     private volatile boolean shutdown = false;
 
-    private final Class<?> baseType;
+    private final Predicate<Class<? extends Event>> eventFilter;
+    private final Function<Class<? extends Event>, String> errorMessageSupplier;
     private final boolean checkTypesOnDispatch;
     private final IEventListenerFactory factory;
 
     @SuppressWarnings("unused")
     private EventBus() {
-        ListenerList.resize(busID + 1);
-        exceptionHandler = this;
-        this.trackPhases = true;
-        this.baseType = Event.class;
-        this.checkTypesOnDispatch = checkTypesOnDispatchProperty;
-        this.factory = new ClassLoaderFactory();
+        this(new BusBuilderImpl());
     }
 
-    private EventBus(final IEventExceptionHandler handler, boolean trackPhase, boolean startShutdown, Class<?> baseType, boolean checkTypesOnDispatch, IEventListenerFactory factory) {
+    private EventBus(final IEventExceptionHandler handler, boolean trackPhase, boolean startShutdown, Predicate<Class<? extends Event>> eventFilter, Function<Class<? extends Event>, String> errorMessageSupplier, boolean checkTypesOnDispatch, IEventListenerFactory factory) {
         ListenerList.resize(busID + 1);
         if (handler == null) exceptionHandler = this;
         else exceptionHandler = handler;
         this.trackPhases = trackPhase;
         this.shutdown = startShutdown;
-        this.baseType = baseType;
+        this.eventFilter = eventFilter;
+        this.errorMessageSupplier = errorMessageSupplier;
         this.checkTypesOnDispatch = checkTypesOnDispatch || checkTypesOnDispatchProperty;
         this.factory = factory;
     }
 
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.trackPhases, busBuilder.startShutdown,
-             busBuilder.markerType, busBuilder.checkTypesOnDispatch,
+             busBuilder.eventFilter, busBuilder.errorMessageSupplier, busBuilder.checkTypesOnDispatch,
              busBuilder.modLauncher ? new ModLauncherFactory() : new ClassLoaderFactory());
     }
 
@@ -148,11 +146,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                     "Method " + method + " has @SubscribeEvent annotation, " +
                             "but takes an argument that is not an Event subtype : " + eventType);
         }
-        if (baseType != Event.class && !baseType.isAssignableFrom(eventType))
+        if (!eventFilter.test((Class<? extends Event>) eventType))
         {
             throw new IllegalArgumentException(
                     "Method " + method + " has @SubscribeEvent annotation, " +
-                            "but takes an argument that is not a subtype of the base type " + baseType + ": " + eventType);
+                            "but takes an argument that is not valid for this bus: " + errorMessageSupplier.apply((Class<? extends Event>) eventType));
         }
 
         if (!Modifier.isPublic(method.getModifiers()))
@@ -245,9 +243,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     private <T extends Event> void addListener(final EventPriority priority, final Predicate<? super T> filter, final Class<T> eventClass, final Consumer<T> consumer) {
-        if (baseType != Event.class && !baseType.isAssignableFrom(eventClass)) {
+        if (!eventFilter.test(eventClass)) {
             throw new IllegalArgumentException(
-                    "Listener for event " + eventClass + " takes an argument that is not a subtype of the base type " + baseType);
+                    "Listener for event " + eventClass + " takes an argument that is not valid for this bus: " + errorMessageSupplier.apply(eventClass));
         }
         addToListeners(consumer, eventClass, NamedEventListener.namedWrapper(e-> doCastFilter(filter, eventClass, consumer, e), consumer.getClass()::getName), priority);
     }
@@ -300,9 +298,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     public boolean post(Event event, IEventBusInvokeDispatcher wrapper)
     {
         if (shutdown) return false;
-        if (checkTypesOnDispatch && !baseType.isInstance(event))
+        if (checkTypesOnDispatch && !eventFilter.test(event.getClass()))
         {
-            throw new IllegalArgumentException("Cannot post event of type " + event.getClass().getSimpleName() + " to this event. Must match type: " + baseType.getSimpleName());
+            throw new IllegalArgumentException("Cannot post event of type " + event.getClass().getSimpleName() + " to this bus: " + errorMessageSupplier.apply(event.getClass()));
         }
 
         IEventListener[] listeners = event.getListenerList().getListeners(busID);
