@@ -24,19 +24,7 @@ public class BenchmarkArmsLength
         }
     };
 
-    public static Runnable supplier() {
-        return () -> {
-            ModLauncher = new Bus(
-                BusBuilder.builder().build(),
-                BusBuilder.builder().build(),
-                BusBuilder.builder().build(),
-                BusBuilder.builder().build()
-            ).register();
-        };
-    }
-
-    public static Bus ModLauncher;
-    public static Bus NoLoader = new Bus(
+    public static final Bus instance = new Bus(
         BusBuilder.builder().build(),
         BusBuilder.builder().build(),
         BusBuilder.builder().build(),

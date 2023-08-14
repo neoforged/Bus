@@ -48,5 +48,4 @@ tasks.register('jmh', JavaExec).configure {
     args    '-f', '3' // forks
     args    '-rff', project.file("${rootProject.buildDir}/jmh_results.txt")  // results file
     args    'net.minecraftforge.eventbus.benchmarks.EventBusBenchmark'
-    args    'net.minecraftforge.eventbus.benchmarks.EventBusBenchmarkNoLoader'
 }
