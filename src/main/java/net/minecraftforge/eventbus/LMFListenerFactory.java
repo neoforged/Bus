@@ -10,6 +10,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class LMFListenerFactory implements IEventListenerFactory {
+    /**
+     * We would prefer to use privateLookupIn(), but that does not set the MODULE bit,
+     * which LMF requires for class definition. So we have to use the IMPL_LOOKUP.
+     */
     private static final MethodHandles.Lookup IMPL_LOOKUP;
 
     static {
@@ -29,12 +33,6 @@ public class LMFListenerFactory implements IEventListenerFactory {
     public IEventListener create(Method callback, Object target) {
         try {
             var callbackClass = callback.getDeclaringClass();
-
-            // We need to read the other module to perform java.lang.invoke operations with it
-            getClass().getModule().addReads(callbackClass.getModule());
-
-            // Sadly this doesn't grant the MODULE bit and thus doesn't allow defining new classes in the module.
-            //var lookup = MethodHandles.privateLookupIn(callbackClass, MethodHandles.lookup());
             var lookup = IMPL_LOOKUP.in(callbackClass);
 
             if (Modifier.isStatic(callback.getModifiers())) {
