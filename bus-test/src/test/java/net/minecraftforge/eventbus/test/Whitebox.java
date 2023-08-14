@@ -25,6 +25,20 @@ public class Whitebox {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T> T invokeInternalMethod(final Object obj, final String methodName, Object... args) {
+        try {
+            var method = Arrays.stream(obj.getClass().getDeclaredMethods())
+                    .filter(m->m.getName().equals(methodName) && m.getParameterTypes().length == args.length)
+                    .findFirst()
+                    .orElseThrow();
+            method.setAccessible(true);
+            return (T)method.invoke(obj, args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T> T getInternalState(final Object object, final String fieldName) {
         try {
             var f = object.getClass().getDeclaredField(fieldName);

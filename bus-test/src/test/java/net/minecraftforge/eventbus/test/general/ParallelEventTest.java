@@ -2,14 +2,15 @@ package net.minecraftforge.eventbus.test.general;
 
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.eventbus.test.ITestHandler;
+import net.minecraftforge.eventbus.test.Whitebox;
 import net.minecraftforge.eventbus.testjar.DummyEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class ParallelEventTest implements ITestHandler {
@@ -20,10 +21,8 @@ public abstract class ParallelEventTest implements ITestHandler {
     private static final AtomicLong COUNTER = new AtomicLong();
 
     @Override
-    public void before(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+    public void before(Supplier<BusBuilder> builder) {
         COUNTER.set(0);
-        validator.accept(DummyEvent.class);
-        validator.accept(DummyEvent.GoodEvent.class);
     }
 
     protected void handle(DummyEvent.GoodEvent event) {
@@ -32,7 +31,7 @@ public abstract class ParallelEventTest implements ITestHandler {
 
     public static class Multiple extends ParallelEventTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             Set<IEventBus> busSet = new HashSet<>();
             for (int i = 0; i < BUS_COUNT; i++) {
                 busSet.add(builder.get().setTrackPhases(false).build()); //make buses for concurrent testing
@@ -43,11 +42,10 @@ public abstract class ParallelEventTest implements ITestHandler {
             });
 
             // Make sure it tracked them all
-//            busSet.forEach(bus -> {
-//                int busid = Whitebox.getInternalState(bus, "busID");
-//                ListenerList afterAdd = Whitebox.invokeMethod(new DummyEvent.GoodEvent(), "getListenerList");
-//                assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length - 1, "Failed to register all event handlers");
-//            });
+            busSet.forEach(bus -> {
+                Object listenerList = Whitebox.invokeInternalMethod(bus, "getOrComputeListenerListInst", DummyEvent.GoodEvent.class);
+                assertEquals(LISTENER_COUNT, Whitebox.<IEventListener[]>invokeInternalMethod(listenerList, "getListeners").length - 1, "Failed to register all event handlers");
+            });
 
             busSet.parallelStream().forEach(iEventBus -> { //post events parallel
                 for (int i = 0; i < RUN_ITERATIONS; i++)
@@ -60,7 +58,7 @@ public abstract class ParallelEventTest implements ITestHandler {
 
     public static class Single extends ParallelEventTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             IEventBus bus = builder.get().setTrackPhases(false).build();
 
             Set<Runnable> toAdd = new HashSet<>();

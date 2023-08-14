@@ -17,6 +17,6 @@ test {
     forkEvery 1
     jvmArgs(
         '--add-opens', 'java.base/java.lang.invoke=cpw.mods.securejarhandler',
-        '--add-opens', 'java.base/java.lang.invoke=net.minecraftforge.eventbus',
+        '--add-opens', 'java.base/java.lang.invoke=net.neoforged.bus',
     )
 }

@@ -1,6 +1,5 @@
 package net.minecraftforge.eventbus.test.general;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.minecraftforge.eventbus.api.BusBuilder;
@@ -20,7 +19,7 @@ public class NonPublicEventHandler implements ITestHandler {
     }
 
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+    public void test(Supplier<BusBuilder> builder) {
         var bus = builder.get().build();
         assertDoesNotThrow(() -> bus.register(new PUBLIC()));
         testCall(bus, true, "PUBLIC");

@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +50,7 @@ public class DeadlockingEventTest implements ITestHandler {
     }
 
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+    public void test(Supplier<BusBuilder> builder) {
         final var cdl = new CountDownLatch(1);
         final IEventBus bus = builder.get().build();
 

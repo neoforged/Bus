@@ -7,16 +7,12 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.test.ITestHandler;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AbstractEventListenerTest implements ITestHandler {
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-        validator.accept(AbstractSuperEvent.class);
-        validator.accept(AbstractSubEvent.class);
-
+    public void test(Supplier<BusBuilder> builder) {
         IEventBus bus = builder.get().build();
         AtomicBoolean abstractSuperEventHandled = new AtomicBoolean(false);
         AtomicBoolean concreteSuperEventHandled = new AtomicBoolean(false);
@@ -33,7 +29,6 @@ public class AbstractEventListenerTest implements ITestHandler {
         assertTrue(concreteSuperEventHandled.get(), "handled concrete super event");
         assertTrue(abstractSubEventHandled.get(), "handled abstract sub event");
         assertTrue(concreteSubEventHandled.get(), "handled concrete sub event");
-        assertTrue(AbstractSubEvent.MERGED_STATIC_INIT == 100, "static init merge failed");
     }
 
     /*
@@ -47,10 +42,7 @@ public class AbstractEventListenerTest implements ITestHandler {
         public ConcreteSuperEvent() {}
     }
 
-    // In transformed world, this will have a 'LISTENER_LIST' injected.
-    // Make sure that it merges static init instead of overwrites
     public static class AbstractSubEvent extends ConcreteSuperEvent {
-        protected static int MERGED_STATIC_INIT = 100;
     }
 
     public static class ConcreteSubEvent extends AbstractSubEvent {

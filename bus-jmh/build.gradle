@@ -35,7 +35,7 @@ tasks.register('jmh', JavaExec).configure {
         '--add-modules', 'ALL-MODULE-PATH',
         '--add-exports', 'net.minecraftforge.eventbus.jmh/net.minecraftforge.eventbus.benchmarks.jmh_generated=jmh.core',
         '--add-opens', 'java.base/java.lang.invoke=cpw.mods.securejarhandler',
-        '--add-opens', 'java.base/java.lang.invoke=net.minecraftforge.eventbus',
+        '--add-opens', 'java.base/java.lang.invoke=net.neoforged.bus',
     ]
     classpath = files(configurations.jmhOnly.asPath)
     mainClass = 'org.openjdk.jmh.Main'

@@ -4,8 +4,6 @@ import cpw.mods.bootstraplauncher.BootstrapLauncher;
 import cpw.mods.modlauncher.api.ServiceRunner;
 import net.minecraftforge.eventbus.api.BusBuilder;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
@@ -16,9 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 public class TestModLauncherBase {
     private static final String CLASS_NAME = "test.modlauncher.class";
     private static final String METHOD_NAME = "test.modlauncher.method";
-
-    void validate(Class<?> clazz) {
-    }
 
     BusBuilder builder() {
         return BusBuilder.builder();
@@ -38,7 +33,7 @@ public class TestModLauncherBase {
 
     protected void doTest(ITestHandler handler) {
         if (System.getProperty(METHOD_NAME) != null) {
-            handler.test(this::validate, this::builder);
+            handler.test(this::builder);
         } else {
             String paths;
             try {

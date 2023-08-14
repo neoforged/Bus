@@ -1,7 +1,6 @@
 package net.minecraftforge.eventbus.test.general;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,11 +13,7 @@ import net.minecraftforge.eventbus.test.ITestHandler;
 
 public class EventFiringEventTest implements ITestHandler {
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-        validator.accept(Event1.class);
-        validator.accept(AbstractEvent.class);
-        validator.accept(AbstractEvent.Event2.class);
-
+    public void test(Supplier<BusBuilder> builder) {
         IEventBus bus = builder.get().build();
         AtomicBoolean handled1 = new AtomicBoolean(false);
         AtomicBoolean handled2 = new AtomicBoolean(false);
