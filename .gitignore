@@ -1,6 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 /.idea/
-/logs/
+*/logs/
 
 # gradle
 .gradle
@@ -21,5 +21,3 @@ out
 /data.txt
 /test.txt
 /src/jmh/generated/
-/eventbus-test/logs/
-/eventbus-jmh/logs/

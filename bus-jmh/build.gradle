@@ -4,7 +4,7 @@ configurations {
 
 dependencies {
     implementation(rootProject)
-    implementation(project(':eventbus-testjars'))
+    implementation(project(':bus-testjars'))
     implementation('cpw.mods:modlauncher:10.0.+')
     implementation('cpw.mods:securejarhandler:2.0.+')
     implementation('org.junit.jupiter:junit-jupiter-engine:5.8.+')
@@ -25,10 +25,11 @@ dependencies {
     annotationProcessor('org.openjdk.jmh:jmh-generator-annprocess:1.35')
 }
 
-task jmh(type: JavaExec, dependsOn: sourceSets.main.output) {
+tasks.register('jmh', JavaExec).configure {
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(17)
     }
+    dependsOn(tasks.compileJava)
     jvmArgs= [
         '-p', sourceSets.main.runtimeClasspath.asPath,
         '--add-modules', 'ALL-MODULE-PATH',
