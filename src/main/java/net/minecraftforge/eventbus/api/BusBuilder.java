@@ -17,11 +17,5 @@ public interface BusBuilder {
     BusBuilder checkTypesOnDispatch();
     BusBuilder markerType(Class<?> type);
 
-    /** @deprecated Does not have an effect anymore. */
-    @Deprecated(forRemoval = true)
-    default BusBuilder useModLauncher() {
-        return this;
-    }
-
     IEventBus build();
 }

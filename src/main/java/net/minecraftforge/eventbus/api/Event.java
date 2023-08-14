@@ -19,8 +19,6 @@
 
 package net.minecraftforge.eventbus.api;
 
-import net.minecraftforge.eventbus.EventAnnotationHelper;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,11 +52,10 @@ public class Event
     public Event() { }
 
     /**
-     * Determine if this function is cancelable at all.
+     * Determine if this event is cancelable at all.
+     * <p>
+     * Only events with a {@link Cancelable} annotation on their class are cancelable.
      * @return If access to setCanceled should be allowed
-     *
-     * Note:
-     * Events with the Cancelable annotation will have this method automatically added to return true.
      */
     public final boolean isCancelable()
     {
@@ -97,9 +94,8 @@ public class Event
 
     /**
      * Determines if this event expects a significant result value.
-     *
-     * Note:
-     * Events with the HasResult annotation will have this method automatically added to return true.
+     * <p>
+     * Only events with the HasResult annotation will have this method return true.
      */
     public final boolean hasResult()
     {

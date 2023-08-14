@@ -20,7 +20,7 @@ public class LockHelper<K,V> {
     private final Map<K, V> backingMap;
     @Nullable
     private volatile Map<K, V> readOnlyView = null;
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     public LockHelper(IntFunction<Map<K, V>> mapConstructor) {
         this.mapConstructor = mapConstructor;
@@ -32,9 +32,13 @@ public class LockHelper<K,V> {
         if (map == null) {
             // Need to update the read map
             synchronized (lock) {
-                var updatedMap = mapConstructor.apply(backingMap.size());
-                updatedMap.putAll(backingMap);
-                readOnlyView = map = updatedMap;
+                if (readOnlyView == null) {
+                    var updatedMap = mapConstructor.apply(backingMap.size());
+                    updatedMap.putAll(backingMap);
+                    readOnlyView = map = updatedMap;
+                } else {
+                    map = readOnlyView;
+                }
             }
         }
         return map;
@@ -82,12 +86,5 @@ public class LockHelper<K,V> {
         }
 
         return ret;
-    }
-
-    // TODO: it's unclear why this method even exists
-    public void clearAll() {
-        backingMap.clear();
-        readOnlyView = null;
-        lock = new Object();
     }
 }
