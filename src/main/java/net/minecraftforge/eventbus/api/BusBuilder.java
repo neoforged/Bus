@@ -10,8 +10,6 @@ public interface BusBuilder {
         return new BusBuilderImpl();
     }
 
-    /* true by default */
-    BusBuilder setTrackPhases(boolean trackPhases);
     BusBuilder setExceptionHandler(IEventExceptionHandler handler);
     BusBuilder startShutdown();
     BusBuilder checkTypesOnDispatch();

@@ -37,7 +37,7 @@ public abstract class ParallelEventTest implements ITestHandler {
         public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
             Set<IEventBus> busSet = new HashSet<>();
             for (int i = 0; i < BUS_COUNT; i++) {
-                busSet.add(builder.get().setTrackPhases(false).build()); //make buses for concurrent testing
+                busSet.add(builder.get().build()); //make buses for concurrent testing
             }
             busSet.parallelStream().forEach(iEventBus -> { //execute parallel listener adding
                 for (int i = 0; i < LISTENER_COUNT; i++)
@@ -48,7 +48,7 @@ public abstract class ParallelEventTest implements ITestHandler {
             busSet.forEach(bus -> {
                 int busid = Whitebox.getInternalState(bus, "busID");
                 ListenerList afterAdd = Whitebox.invokeMethod(new DummyEvent.GoodEvent(), "getListenerList");
-                assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length - 1, "Failed to register all event handlers");
+                assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length, "Failed to register all event handlers");
             });
 
             busSet.parallelStream().forEach(iEventBus -> { //post events parallel
@@ -63,7 +63,7 @@ public abstract class ParallelEventTest implements ITestHandler {
     public static class Single extends ParallelEventTest {
         @Override
         public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-            IEventBus bus = builder.get().setTrackPhases(false).build();
+            IEventBus bus = builder.get().build();
 
             Set<Runnable> toAdd = new HashSet<>();
 
@@ -75,7 +75,7 @@ public abstract class ParallelEventTest implements ITestHandler {
             // Make sure it tracked them all
             int busid = Whitebox.getInternalState(bus, "busID");
             ListenerList afterAdd = Whitebox.invokeMethod(new DummyEvent.GoodEvent(), "getListenerList");
-            assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length - 1, "Failed to register all event handlers");
+            assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length, "Failed to register all event handlers");
 
             toAdd = new HashSet<>();
             for (int i = 0; i < RUN_ITERATIONS; i++) //prepare parallel event posting

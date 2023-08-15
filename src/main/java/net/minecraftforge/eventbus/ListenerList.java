@@ -252,11 +252,7 @@ public class ListenerList
             }
             ArrayList<IEventListener> ret = new ArrayList<>();
             Arrays.stream(EventPriority.values()).forEach(value -> {
-                List<IEventListener> listeners = getListeners(value);
-                if (listeners.size() > 0) {
-                    ret.add(value); //Add the priority to notify the event of it's current phase.
-                    ret.addAll(listeners);
-                }
+                ret.addAll(getListeners(value));
             });
             this.listeners.set(ret.toArray(new IEventListener[0]));
             rebuild = false;

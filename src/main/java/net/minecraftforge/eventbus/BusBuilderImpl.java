@@ -10,17 +10,10 @@ import net.minecraftforge.eventbus.api.IEventExceptionHandler;
  */
 public final class BusBuilderImpl implements BusBuilder {
     IEventExceptionHandler exceptionHandler;
-    boolean trackPhases = true;
     boolean startShutdown = false;
     boolean checkTypesOnDispatch = false;
     Class<?> markerType = Event.class;
     boolean modLauncher = false;
-
-    @Override
-    public BusBuilder setTrackPhases(boolean trackPhases) {
-        this.trackPhases = trackPhases;
-        return this;
-    }
 
     @Override
     public BusBuilder setExceptionHandler(IEventExceptionHandler handler) {
