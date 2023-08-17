@@ -245,26 +245,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
-    public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Class<T> eventType, Consumer<T> consumer) {
-        addGenericListener(genericClassFilter, EventPriority.NORMAL, false, eventType, consumer);
-    }
-
-    @Override
-    public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, boolean receiveCancelled, Consumer<T> consumer) {
-        addGenericListener(genericClassFilter, EventPriority.NORMAL, receiveCancelled, consumer);
-    }
-
-    @Override
-    public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Class<T> eventType, Consumer<T> consumer) {
-        addGenericListener(genericClassFilter, priority, false, eventType, consumer);
-    }
-
-    @Override
-    public <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer) {
-        addGenericListener(genericClassFilter, EventPriority.NORMAL, receiveCancelled, eventType, consumer);
-    }
-
-    @Override
     public <T extends GenericEvent<? extends F>, F> void addGenericListener(final Class<F> genericClassFilter, final EventPriority priority, final boolean receiveCancelled, final Class<T> eventType, final Consumer<T> consumer) {
         addListener(priority, passGenericFilter(genericClassFilter).and(passCancelled(receiveCancelled)), eventType, consumer);
     }
