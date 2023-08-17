@@ -1,4 +1,4 @@
-open module net.minecraftforge.eventbus.test {
+open module net.neoforged.bus.test {
     requires cpw.mods.modlauncher;
     requires cpw.mods.securejarhandler;
     requires cpw.mods.bootstraplauncher;
@@ -8,12 +8,12 @@ open module net.minecraftforge.eventbus.test {
     requires org.objectweb.asm.tree;
     requires org.apache.logging.log4j;
     requires org.apache.logging.log4j.core;
-    requires net.minecraftforge.eventbus;
+    requires net.neoforged.bus;
     requires jopt.simple;
 
     requires static org.jetbrains.annotations;
 
-    requires static net.minecraftforge.eventbus.testjars;
+    requires static net.neoforged.bus.testjars;
 
     exports net.minecraftforge.eventbus.test;
 

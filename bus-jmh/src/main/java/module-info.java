@@ -7,13 +7,13 @@ open module net.minecraftforge.eventbus.jmh {
     requires org.objectweb.asm.tree;
     requires org.apache.logging.log4j;
     requires org.apache.logging.log4j.core;
-    requires net.minecraftforge.eventbus;
+    requires net.neoforged.bus;
     requires jopt.simple;
     requires jmh.core;
     requires cpw.mods.bootstraplauncher;
 
     requires static org.jetbrains.annotations;
-    requires static net.minecraftforge.eventbus.testjars;
+    requires static net.neoforged.bus.testjars;
 
     exports net.minecraftforge.eventbus.benchmarks;
 

@@ -1,7 +1,7 @@
 
 dependencies {
     implementation(rootProject)
-    implementation(project(':eventbus-testjars'))
+    implementation(project(':bus-testjars'))
     implementation('org.junit.jupiter:junit-jupiter-api:5.8.+')
     implementation('cpw.mods:modlauncher:10.0.+')
     implementation('cpw.mods:securejarhandler:2.0.+')

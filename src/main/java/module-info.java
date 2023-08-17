@@ -1,4 +1,4 @@
-open module net.minecraftforge.eventbus {
+open module net.neoforged.bus {
     uses net.minecraftforge.eventbus.IEventBusEngine;
     requires cpw.mods.modlauncher;
 
