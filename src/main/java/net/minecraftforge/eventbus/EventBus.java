@@ -200,6 +200,26 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
+    public <T extends Event> void addListener(EventPriority priority, Class<T> eventType, Consumer<T> consumer) {
+        addListener(priority, false, eventType, consumer);
+    }
+
+    @Override
+    public <T extends Event> void addListener(boolean receiveCancelled, Consumer<T> consumer) {
+        addListener(EventPriority.NORMAL, receiveCancelled, consumer);
+    }
+
+    @Override
+    public <T extends Event> void addListener(boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer) {
+        addListener(EventPriority.NORMAL, receiveCancelled, eventType, consumer);
+    }
+
+    @Override
+    public <T extends Event> void addListener(Class<T> eventType, Consumer<T> consumer) {
+        addListener(EventPriority.NORMAL, false, eventType, consumer);
+    }
+
+    @Override
     public <T extends Event> void addListener(final EventPriority priority, final boolean receiveCancelled, final Class<T> eventType, final Consumer<T> consumer) {
         checkNotGeneric(eventType);
         addListener(priority, passCancelled(receiveCancelled), eventType, consumer);

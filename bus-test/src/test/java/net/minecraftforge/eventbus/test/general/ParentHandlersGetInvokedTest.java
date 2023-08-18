@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.test.ITestHandler;
 
@@ -21,7 +20,7 @@ public class ParentHandlersGetInvokedTest implements ITestHandler {
         IEventBus bus = builder.get().build();
         AtomicBoolean superEventHandled = new AtomicBoolean(false);
         AtomicBoolean subEventHandled = new AtomicBoolean(false);
-        bus.addListener(EventPriority.NORMAL, false, SuperEvent.class, (event) -> {
+        bus.addListener(SuperEvent.class, (event) -> {
             Class<? extends SuperEvent> eventClass = event.getClass();
             if (eventClass == SuperEvent.class) {
                 superEventHandled.set(true);

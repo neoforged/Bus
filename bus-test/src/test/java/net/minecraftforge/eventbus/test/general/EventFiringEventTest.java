@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.test.ITestHandler;
 
@@ -22,11 +21,11 @@ public class EventFiringEventTest implements ITestHandler {
         IEventBus bus = builder.get().build();
         AtomicBoolean handled1 = new AtomicBoolean(false);
         AtomicBoolean handled2 = new AtomicBoolean(false);
-        bus.addListener(EventPriority.NORMAL, false, Event1.class, (event1) -> {
+        bus.addListener(Event1.class, (event1) -> {
             bus.post(new AbstractEvent.Event2());
             handled1.set(true);
         });
-        bus.addListener(EventPriority.NORMAL, false, AbstractEvent.Event2.class, (event2) -> {
+        bus.addListener(AbstractEvent.Event2.class, (event2) -> {
             handled2.set(true);
         });
 
