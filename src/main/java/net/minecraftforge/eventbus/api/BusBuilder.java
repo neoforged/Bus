@@ -13,7 +13,15 @@ public interface BusBuilder {
     BusBuilder setExceptionHandler(IEventExceptionHandler handler);
     BusBuilder startShutdown();
     BusBuilder checkTypesOnDispatch();
-    BusBuilder markerType(Class<?> type);
+    default BusBuilder markerType(Class<?> markerInterface) {
+        if (!markerInterface.isInterface()) throw new IllegalArgumentException("Cannot specify a class marker type");
+        return classChecker(eventType -> {
+            if (!markerInterface.isAssignableFrom(eventType)) {
+                throw new IllegalArgumentException("This bus only accepts subclasses of " + markerInterface + ", which " + eventType + " is not.");
+            }
+        });
+    }
+    BusBuilder classChecker(IEventClassChecker checker);
 
     /* Use ModLauncher hooks when creating ASM handlers. */
     BusBuilder useModLauncher();

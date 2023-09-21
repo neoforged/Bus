@@ -1,8 +1,8 @@
 package net.minecraftforge.eventbus;
 
 import net.minecraftforge.eventbus.api.BusBuilder;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.IEventClassChecker;
 import net.minecraftforge.eventbus.api.IEventExceptionHandler;
 
 /**
@@ -12,7 +12,7 @@ public final class BusBuilderImpl implements BusBuilder {
     IEventExceptionHandler exceptionHandler;
     boolean startShutdown = false;
     boolean checkTypesOnDispatch = false;
-    Class<?> markerType = Event.class;
+    IEventClassChecker classChecker = eventClass -> {};
     boolean modLauncher = false;
 
     @Override
@@ -34,9 +34,8 @@ public final class BusBuilderImpl implements BusBuilder {
     }
 
     @Override
-    public BusBuilder markerType(Class<?> type) {
-        if (!type.isInterface()) throw new IllegalArgumentException("Cannot specify a class marker type");
-        this.markerType = type;
+    public BusBuilder classChecker(IEventClassChecker checker) {
+        this.classChecker = checker;
         return this;
     }
 

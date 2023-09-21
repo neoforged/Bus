@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import net.minecraftforge.eventbus.test.general.AbstractEventListenerTest;
 import net.minecraftforge.eventbus.test.general.DeadlockingEventTest;
 import net.minecraftforge.eventbus.test.general.EventBusSubtypeFilterTest;
+import net.minecraftforge.eventbus.test.general.EventClassCheckTest;
 import net.minecraftforge.eventbus.test.general.EventFiringEventTest;
 import net.minecraftforge.eventbus.test.general.EventHandlerExceptionTest;
 import net.minecraftforge.eventbus.test.general.GenericListenerTests;
@@ -58,6 +59,11 @@ public class TestNoLoader extends TestNoLoaderBase {
     @Test
     void eventHandlersCanFireEvents() {
         doTest(new EventFiringEventTest() {});
+    }
+
+    @Test
+    public void eventClassChecks() {
+        doTest(new EventClassCheckTest() {});
     }
 
     @Test
