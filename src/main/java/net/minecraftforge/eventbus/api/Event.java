@@ -21,12 +21,9 @@ package net.minecraftforge.eventbus.api;
 
 import net.minecraftforge.eventbus.EventSubclassTransformer;
 import net.minecraftforge.eventbus.ListenerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.Objects;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -49,7 +46,6 @@ public class Event
 
     private boolean isCanceled = false;
     private Result result = Result.DEFAULT;
-    private EventPriority phase = null;
 
     public Event() { }
 
@@ -140,19 +136,5 @@ public class Event
     public ListenerList getListenerList()
     {
         return EventListenerHelper.getListenerListInternal(this.getClass(), true);
-    }
-
-    @Nullable
-    public EventPriority getPhase()
-    {
-        return this.phase;
-    }
-
-    public void setPhase(@NotNull EventPriority value)
-    {
-        Objects.requireNonNull(value, "setPhase argument must not be null");
-        int prev = phase == null ? -1 : phase.ordinal();
-        if (prev >= value.ordinal()) throw new IllegalArgumentException("Attempted to set event phase to "+ value +" when already "+ phase);
-        phase = value;
     }
 }
