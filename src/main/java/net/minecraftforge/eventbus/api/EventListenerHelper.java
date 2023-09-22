@@ -53,6 +53,12 @@ public class EventListenerHelper
     static ListenerList getListenerListInternal(Class<?> eventClass, boolean fromInstanceCall)
     {
         if (eventClass == Event.class) return EVENTS_LIST; // Small optimization, bypasses all the locks/maps.
+
+        // Skip allocating lambda if possible
+        var list = listeners.get(eventClass);
+        if (list != null)
+            return list;
+
         return listeners.computeIfAbsent(eventClass, () -> computeListenerList(eventClass, fromInstanceCall));
     }
 
@@ -99,6 +105,11 @@ public class EventListenerHelper
     private static boolean hasAnnotation(Class<?> eventClass, Class<? extends Annotation> annotation, LockHelper<Class<?>, Boolean> lock) {
         if (eventClass == Event.class)
             return false;
+
+        // Skip allocating lambda if possible
+        var result = lock.get(eventClass);
+        if (result != null)
+            return result;
 
         return lock.computeIfAbsent(eventClass, () -> {
             var parent = eventClass.getSuperclass();
