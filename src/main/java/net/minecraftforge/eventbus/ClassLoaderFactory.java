@@ -18,7 +18,7 @@ public class ClassLoaderFactory implements IEventListenerFactory {
     private static final String HANDLER_DESC = Type.getInternalName(IEventListener.class);
     private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Event.class));
     private static final ASMClassLoader LOADER = new ASMClassLoader();
-    private static final LockHelper<Method, Class<?>> cache = new LockHelper<>(new HashMap<>());
+    private static final LockHelper<Method, Class<?>> cache = new LockHelper<>(HashMap::new);
 
     @Override
     public IEventListener create(Method method, Object target) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {

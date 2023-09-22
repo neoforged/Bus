@@ -32,10 +32,10 @@ import java.util.function.Function;
 
 public class EventListenerHelper
 {
-    private static final LockHelper<Class<?>, ListenerList> listeners = new LockHelper<>(new IdentityHashMap<>());
+    private static final LockHelper<Class<?>, ListenerList> listeners = new LockHelper<>(IdentityHashMap::new);
     private static final ListenerList EVENTS_LIST = new ListenerList();
-    private static final LockHelper<Class<?>, Boolean> cancelable = new LockHelper<>(new IdentityHashMap<>());
-    private static final LockHelper<Class<?>, Boolean> hasResult = new LockHelper<>(new IdentityHashMap<>());
+    private static final LockHelper<Class<?>, Boolean> cancelable = new LockHelper<>(IdentityHashMap::new);
+    private static final LockHelper<Class<?>, Boolean> hasResult = new LockHelper<>(IdentityHashMap::new);
     /**
      * Returns a {@link ListenerList} object that contains all listeners
      * that are registered to this event class.
