@@ -1,7 +1,6 @@
 package net.minecraftforge.eventbus;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Optional;
 import org.objectweb.asm.tree.ClassNode;
 
@@ -9,7 +8,7 @@ import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 
 public class ModLauncherFactory extends ClassLoaderFactory {
-    private static final LockHelper<String, Method> PENDING = new LockHelper<>(HashMap::new);
+    private static final LockHelper<String, Method> PENDING = LockHelper.withHashMap();
     private Optional<ClassLoader> gameClassLoader = null;
 
     @Override

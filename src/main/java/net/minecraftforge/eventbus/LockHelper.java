@@ -2,6 +2,8 @@ package net.minecraftforge.eventbus;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -13,6 +15,15 @@ import java.util.function.Supplier;
  * yet still manages to properly deal with many threads.
  */
 public class LockHelper<K,V> {
+    public static <K, V> LockHelper<K, V> withHashMap() {
+        // convert size to capacity according to default load factor
+        return new LockHelper<>(size -> new HashMap<>((size + 2) * 4 / 3));
+    }
+
+    public static <K, V> LockHelper<K, V> withIdentityHashMap() {
+        return new LockHelper<>(IdentityHashMap::new);
+    }
+
     private final IntFunction<Map<K, V>> mapConstructor;
     /**
      * Only modify this map while holding the lock object!
@@ -22,7 +33,7 @@ public class LockHelper<K,V> {
     private volatile Map<K, V> readOnlyView = null;
     private Object lock = new Object();
 
-    public LockHelper(IntFunction<Map<K, V>> mapConstructor) {
+    private LockHelper(IntFunction<Map<K, V>> mapConstructor) {
         this.mapConstructor = mapConstructor;
         this.backingMap = mapConstructor.apply(32); // reasonable initial size
     }

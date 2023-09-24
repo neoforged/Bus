@@ -27,15 +27,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.IdentityHashMap;
-import java.util.function.Function;
 
 public class EventListenerHelper
 {
-    private static final LockHelper<Class<?>, ListenerList> listeners = new LockHelper<>(IdentityHashMap::new);
+    private static final LockHelper<Class<?>, ListenerList> listeners = LockHelper.withIdentityHashMap();
     private static final ListenerList EVENTS_LIST = new ListenerList();
-    private static final LockHelper<Class<?>, Boolean> cancelable = new LockHelper<>(IdentityHashMap::new);
-    private static final LockHelper<Class<?>, Boolean> hasResult = new LockHelper<>(IdentityHashMap::new);
+    private static final LockHelper<Class<?>, Boolean> cancelable = LockHelper.withIdentityHashMap();
+    private static final LockHelper<Class<?>, Boolean> hasResult = LockHelper.withIdentityHashMap();
     /**
      * Returns a {@link ListenerList} object that contains all listeners
      * that are registered to this event class.
