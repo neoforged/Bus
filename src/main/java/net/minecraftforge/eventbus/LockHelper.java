@@ -24,7 +24,7 @@ public class LockHelper<K,V> {
 
     public LockHelper(IntFunction<Map<K, V>> mapConstructor) {
         this.mapConstructor = mapConstructor;
-        this.backingMap = mapConstructor.apply(0);
+        this.backingMap = mapConstructor.apply(32); // reasonable initial size
     }
 
     private Map<K, V> getReadMap() {
