@@ -27,15 +27,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.IdentityHashMap;
-import java.util.function.Function;
 
 public class EventListenerHelper
 {
-    private static final LockHelper<Class<?>, ListenerList> listeners = new LockHelper<>(new IdentityHashMap<>());
+    private static final LockHelper<Class<?>, ListenerList> listeners = LockHelper.withIdentityHashMap();
     private static final ListenerList EVENTS_LIST = new ListenerList();
-    private static final LockHelper<Class<?>, Boolean> cancelable = new LockHelper<>(new IdentityHashMap<>());
-    private static final LockHelper<Class<?>, Boolean> hasResult = new LockHelper<>(new IdentityHashMap<>());
+    private static final LockHelper<Class<?>, Boolean> cancelable = LockHelper.withIdentityHashMap();
+    private static final LockHelper<Class<?>, Boolean> hasResult = LockHelper.withIdentityHashMap();
     /**
      * Returns a {@link ListenerList} object that contains all listeners
      * that are registered to this event class.
@@ -53,6 +51,12 @@ public class EventListenerHelper
     static ListenerList getListenerListInternal(Class<?> eventClass, boolean fromInstanceCall)
     {
         if (eventClass == Event.class) return EVENTS_LIST; // Small optimization, bypasses all the locks/maps.
+
+        // Skip allocating lambda if possible
+        var list = listeners.get(eventClass);
+        if (list != null)
+            return list;
+
         return listeners.computeIfAbsent(eventClass, () -> computeListenerList(eventClass, fromInstanceCall));
     }
 
@@ -99,6 +103,11 @@ public class EventListenerHelper
     private static boolean hasAnnotation(Class<?> eventClass, Class<? extends Annotation> annotation, LockHelper<Class<?>, Boolean> lock) {
         if (eventClass == Event.class)
             return false;
+
+        // Skip allocating lambda if possible
+        var result = lock.get(eventClass);
+        if (result != null)
+            return result;
 
         return lock.computeIfAbsent(eventClass, () -> {
             var parent = eventClass.getSuperclass();
