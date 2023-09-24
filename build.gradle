@@ -83,7 +83,7 @@ ext.sharedManifest = manifest {
         'Git-Commit': gradleutils.gitInfo.abbreviatedId,
         'Git-Branch': gradleutils.gitInfo.branch,
         'Build-Number': "${System.getenv('BUILD_NUMBER')?:0}" 
-    ] as LinkedHashMap, 'net/minecraftforge/eventbus/service/')
+    ] as LinkedHashMap, 'net/neoforged/bus/service/')
 }
 
 jar {

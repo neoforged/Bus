@@ -1,5 +1,5 @@
 open module net.neoforged.bus {
-    uses net.minecraftforge.eventbus.IEventBusEngine;
+    uses net.neoforged.bus.IEventBusEngine;
     requires cpw.mods.modlauncher;
 
     requires org.objectweb.asm;
@@ -8,8 +8,8 @@ open module net.neoforged.bus {
     requires static org.jetbrains.annotations;
     requires net.jodah.typetools;
 
-    exports net.minecraftforge.eventbus;
-    exports net.minecraftforge.eventbus.api;
-    provides cpw.mods.modlauncher.serviceapi.ILaunchPluginService with net.minecraftforge.eventbus.service.ModLauncherService;
-    provides net.minecraftforge.eventbus.IEventBusEngine with net.minecraftforge.eventbus.EventBusEngine;
+    exports net.neoforged.bus;
+    exports net.neoforged.bus.api;
+    provides cpw.mods.modlauncher.serviceapi.ILaunchPluginService with net.neoforged.bus.service.ModLauncherService;
+    provides net.neoforged.bus.IEventBusEngine with net.neoforged.bus.EventBusEngine;
 }
