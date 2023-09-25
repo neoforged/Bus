@@ -15,7 +15,7 @@ open module net.neoforged.bus.test {
 
     requires static net.neoforged.bus.testjars;
 
-    exports net.minecraftforge.eventbus.test;
+    exports net.neoforged.bus.test;
 
-    provides cpw.mods.modlauncher.api.ITransformationService with net.minecraftforge.eventbus.test.MockTransformerService;
+    provides cpw.mods.modlauncher.api.ITransformationService with net.neoforged.bus.test.MockTransformerService;
 }

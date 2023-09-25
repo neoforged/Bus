@@ -33,7 +33,7 @@ tasks.register('jmh', JavaExec).configure {
     jvmArgs= [
         '-p', sourceSets.main.runtimeClasspath.asPath,
         '--add-modules', 'ALL-MODULE-PATH',
-        '--add-exports', 'net.minecraftforge.eventbus.jmh/net.minecraftforge.eventbus.benchmarks.jmh_generated=jmh.core',
+        '--add-exports', 'net.neoforged.bus.jmh/net.neoforged.bus.benchmarks.jmh_generated=jmh.core',
         '--add-opens', 'java.base/java.lang.invoke=cpw.mods.securejarhandler'
     ]
     classpath = files(configurations.jmhOnly.asPath)
@@ -46,6 +46,6 @@ tasks.register('jmh', JavaExec).configure {
     args    '-tu', 'ns' // time unit
     args    '-f', '3' // forks
     args    '-rff', project.file("${rootProject.buildDir}/jmh_results.txt")  // results file
-    args    'net.minecraftforge.eventbus.benchmarks.EventBusBenchmark'
-    args    'net.minecraftforge.eventbus.benchmarks.EventBusBenchmarkNoLoader'
+    args    'net.neoforged.bus.benchmarks.EventBusBenchmark'
+    args    'net.neoforged.bus.benchmarks.EventBusBenchmarkNoLoader'
 }

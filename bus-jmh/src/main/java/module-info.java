@@ -1,4 +1,4 @@
-open module net.minecraftforge.eventbus.jmh {
+open module net.neoforged.bus.jmh {
     requires cpw.mods.modlauncher;
     requires cpw.mods.securejarhandler;
 
@@ -15,8 +15,8 @@ open module net.minecraftforge.eventbus.jmh {
     requires static org.jetbrains.annotations;
     requires static net.neoforged.bus.testjars;
 
-    exports net.minecraftforge.eventbus.benchmarks;
+    exports net.neoforged.bus.benchmarks;
 
-    provides cpw.mods.modlauncher.api.ITransformationService with net.minecraftforge.eventbus.benchmarks.MockTransformerService;
+    provides cpw.mods.modlauncher.api.ITransformationService with net.neoforged.bus.benchmarks.MockTransformerService;
 
 }
