@@ -1,7 +1,6 @@
 package net.neoforged.bus.test.general;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,10 +12,7 @@ import net.neoforged.bus.test.ITestHandler;
 
 public class ParentHandlersGetInvokedTest implements ITestHandler {
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-        validator.accept(SuperEvent.class);
-        validator.accept(SubEvent.class);
-
+    public void test(Supplier<BusBuilder> builder) {
         IEventBus bus = builder.get().build();
         AtomicBoolean superEventHandled = new AtomicBoolean(false);
         AtomicBoolean subEventHandled = new AtomicBoolean(false);

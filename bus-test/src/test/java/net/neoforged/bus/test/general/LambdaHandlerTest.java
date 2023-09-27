@@ -6,7 +6,6 @@ import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.test.ITestHandler;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -16,9 +15,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
     boolean hit;
 
     @Override
-    public void before(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-        validator.accept(SubEvent.class);
-        validator.accept(CancellableEvent.class);
+    public void before(Supplier<BusBuilder> builder) {
         hit = false;
     }
 
@@ -27,7 +24,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
 
     public static class Basic extends LambdaHandlerTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             final IEventBus iEventBus = builder.get().build();
             // Inline
             iEventBus.addListener((Event e)-> hit = true);
@@ -44,7 +41,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
 
     public static class SubClassEvent extends LambdaHandlerTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             final IEventBus iEventBus = builder.get().build();
             // Inline
             iEventBus.addListener((SubEvent e) -> hit = true);
@@ -65,7 +62,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
 
     public static class Generics extends LambdaHandlerTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             // pathological test because you can't derive the lambda types in all cases...
             // I don't quite understand what this is testing, Care to enlighten me cpw? --Lex
             IEventBus bus = builder.get().build();

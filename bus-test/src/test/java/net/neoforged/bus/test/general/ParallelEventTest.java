@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class ParallelEventTest implements ITestHandler {
@@ -22,10 +21,8 @@ public abstract class ParallelEventTest implements ITestHandler {
     private static final AtomicLong COUNTER = new AtomicLong();
 
     @Override
-    public void before(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+    public void before(Supplier<BusBuilder> builder) {
         COUNTER.set(0);
-        validator.accept(DummyEvent.class);
-        validator.accept(DummyEvent.GoodEvent.class);
     }
 
     protected void handle(DummyEvent.GoodEvent event) {
@@ -34,7 +31,7 @@ public abstract class ParallelEventTest implements ITestHandler {
 
     public static class Multiple extends ParallelEventTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             Set<IEventBus> busSet = new HashSet<>();
             for (int i = 0; i < BUS_COUNT; i++) {
                 busSet.add(builder.get().build()); //make buses for concurrent testing
@@ -62,7 +59,7 @@ public abstract class ParallelEventTest implements ITestHandler {
 
     public static class Single extends ParallelEventTest {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             IEventBus bus = builder.get().build();
 
             Set<Runnable> toAdd = new HashSet<>();

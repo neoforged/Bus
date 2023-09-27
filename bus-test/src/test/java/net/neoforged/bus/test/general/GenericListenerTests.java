@@ -2,7 +2,6 @@ package net.neoforged.bus.test.general;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.neoforged.bus.api.BusBuilder;
@@ -22,7 +21,7 @@ public abstract class GenericListenerTests implements ITestHandler {
 
     public static class Basic extends GenericListenerTests {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             IEventBus bus = builder.get().build();
             bus.addGenericListener(List.class, this::handleGenericEvent);
             bus.post(new GenericEvent<List<String>>() {
@@ -36,7 +35,7 @@ public abstract class GenericListenerTests implements ITestHandler {
 
     public static class IncorrectRegistration extends GenericListenerTests {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             IEventBus bus = builder.get().build();
             Assertions.assertThrows(IllegalArgumentException.class, () -> bus.addListener(this::handleGenericEvent));
         }
@@ -44,7 +43,7 @@ public abstract class GenericListenerTests implements ITestHandler {
 
     public static class Wildcard extends GenericListenerTests {
         @Override
-        public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+        public void test(Supplier<BusBuilder> builder) {
             IEventBus bus = builder.get().build();
             var hdl = new GenericHandler();
             bus.register(hdl);

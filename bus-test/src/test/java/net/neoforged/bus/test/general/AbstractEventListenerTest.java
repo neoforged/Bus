@@ -6,16 +6,12 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.test.ITestHandler;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AbstractEventListenerTest implements ITestHandler {
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-        validator.accept(AbstractSuperEvent.class);
-        validator.accept(AbstractSubEvent.class);
-
+    public void test(Supplier<BusBuilder> builder) {
         IEventBus bus = builder.get().build();
         AtomicBoolean abstractSuperEventHandled = new AtomicBoolean(false);
         AtomicBoolean concreteSuperEventHandled = new AtomicBoolean(false);
