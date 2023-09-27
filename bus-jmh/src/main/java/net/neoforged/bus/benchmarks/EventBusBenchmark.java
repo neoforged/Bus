@@ -17,6 +17,8 @@ public class EventBusBenchmark {
 
     private Object ModLauncher;
     private Object ClassLoader;
+    private Object MethodHandles;
+    private Object LMF;
     private Consumer<Object> postStatic;
     private Consumer<Object> postDynamic;
     private Consumer<Object> postLambda;
@@ -33,6 +35,8 @@ public class EventBusBenchmark {
         Class<?> cls = Class.forName(ARMS_LENGTH, false, Thread.currentThread().getContextClassLoader());
         ModLauncher  = cls.getField("ModLauncher").get(null);
         ClassLoader  = cls.getField("ClassLoader").get(null);
+        MethodHandles = cls.getField("MethodHandles").get(null);
+        LMF          = cls.getField("LMF").get(null);
         postStatic   = (Consumer<Object>)cls.getField("postStatic").get(null);
         postDynamic  = (Consumer<Object>)cls.getField("postDynamic").get(null);
         postLambda   = (Consumer<Object>)cls.getField("postLambda").get(null);
@@ -92,6 +96,56 @@ public class EventBusBenchmark {
     @Benchmark
     public int testClassLoaderCombined() throws Throwable {
         postCombined.accept(ClassLoader);
+        return 0;
+    }
+
+    // MethodHandle Factory
+    @Benchmark
+    public int testMethodHandlesDynamic() throws Throwable {
+        postDynamic.accept(MethodHandles);
+        return 0;
+    }
+
+    @Benchmark
+    public int testMethodHandlesLambda() throws Throwable {
+        postLambda.accept(MethodHandles);
+        return 0;
+    }
+
+    @Benchmark
+    public int testMethodHandlesStatic() throws Throwable {
+        postStatic.accept(MethodHandles);
+        return 0;
+    }
+
+    @Benchmark
+    public int testMethodHandlesCombined() throws Throwable {
+        postCombined.accept(MethodHandles);
+        return 0;
+    }
+
+    // LMF Factory
+    @Benchmark
+    public int testLMFDynamic() throws Throwable {
+        postDynamic.accept(LMF);
+        return 0;
+    }
+
+    @Benchmark
+    public int testLMFLambda() throws Throwable {
+        postLambda.accept(LMF);
+        return 0;
+    }
+
+    @Benchmark
+    public int testLMFStatic() throws Throwable {
+        postStatic.accept(LMF);
+        return 0;
+    }
+
+    @Benchmark
+    public int testLMFCombined() throws Throwable {
+        postCombined.accept(LMF);
         return 0;
     }
 }

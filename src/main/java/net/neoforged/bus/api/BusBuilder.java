@@ -24,7 +24,10 @@ public interface BusBuilder {
     BusBuilder classChecker(IEventClassChecker checker);
 
     /* Use ModLauncher hooks when creating ASM handlers. */
-    BusBuilder useModLauncher();
+    default BusBuilder useModLauncher() {
+        return factoryType(FactoryType.MOD_LAUNCHER);
+    }
+    BusBuilder factoryType(FactoryType type);
 
     IEventBus build();
 }

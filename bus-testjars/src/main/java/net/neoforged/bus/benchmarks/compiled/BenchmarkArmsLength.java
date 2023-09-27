@@ -3,6 +3,7 @@ package net.neoforged.bus.benchmarks.compiled;
 import java.util.function.Consumer;
 
 import net.neoforged.bus.api.BusBuilder;
+import net.neoforged.bus.api.FactoryType;
 import net.neoforged.bus.api.IEventBus;
 
 public class BenchmarkArmsLength
@@ -38,11 +39,25 @@ public class BenchmarkArmsLength
                 BusBuilder.builder().build(),
                 BusBuilder.builder().build()
             ).register();
+            MethodHandles = new Bus(
+                    BusBuilder.builder().factoryType(FactoryType.METHOD_HANDLES).build(),
+                    BusBuilder.builder().factoryType(FactoryType.METHOD_HANDLES).build(),
+                    BusBuilder.builder().factoryType(FactoryType.METHOD_HANDLES).build(),
+                    BusBuilder.builder().factoryType(FactoryType.METHOD_HANDLES).build()
+            ).register();
+            LMF = new Bus(
+                    BusBuilder.builder().factoryType(FactoryType.LAMBDA_META_FACTORY).build(),
+                    BusBuilder.builder().factoryType(FactoryType.LAMBDA_META_FACTORY).build(),
+                    BusBuilder.builder().factoryType(FactoryType.LAMBDA_META_FACTORY).build(),
+                    BusBuilder.builder().factoryType(FactoryType.LAMBDA_META_FACTORY).build()
+            ).register();
         };
     }
 
     public static Bus ModLauncher;
     public static Bus ClassLoader;
+    public static Bus MethodHandles;
+    public static Bus LMF;
     public static Bus NoLoader = new Bus(
         BusBuilder.builder().build(),
         BusBuilder.builder().build(),
