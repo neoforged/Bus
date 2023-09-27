@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,8 +70,7 @@ public class ThreadedListenerExceptionTest implements ITestHandler {
     }
 
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
-        validator.accept(TestEvent.class);
+    public void test(Supplier<BusBuilder> builder) {
         var bus = bus(builder.get());
 
         final List<Callable<Object>> callables = Collections.nCopies(50, Executors.callable(() -> bus.addListener(ThreadedListenerExceptionTest::testEvent1)));

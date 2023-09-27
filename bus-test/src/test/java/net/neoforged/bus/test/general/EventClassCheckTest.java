@@ -1,6 +1,5 @@
 package net.neoforged.bus.test.general;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.neoforged.bus.api.BusBuilder;
@@ -17,7 +16,7 @@ public class EventClassCheckTest implements ITestHandler {
     public static class TestForgeBusEvent extends Event {}
 
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+    public void test(Supplier<BusBuilder> builder) {
         var modBus = builder.get().markerType(IModBusEvent.class).checkTypesOnDispatch().build();
         var forgeBus = builder.get().checkTypesOnDispatch().classChecker(eventClass -> {
             if (IModBusEvent.class.isAssignableFrom(eventClass)) {

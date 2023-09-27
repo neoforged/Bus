@@ -6,12 +6,11 @@ import net.neoforged.bus.testjar.DummyEvent;
 import net.neoforged.bus.testjar.EventBusTestClass;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ParentHandlersGetInvokedTestDummy implements ITestHandler {
     @Override
-    public void test(Consumer<Class<?>> validator, Supplier<BusBuilder> builder) {
+    public void test(Supplier<BusBuilder> builder) {
         var bus = builder.get().build();
         var listener = new EventBusTestClass();
         bus.register(listener);

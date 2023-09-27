@@ -15,9 +15,6 @@ public class TestModLauncherBase {
     private static final String CLASS_NAME = "test.modlauncher.class";
     private static final String METHOD_NAME = "test.modlauncher.method";
 
-    void validate(Class<?> clazz) {
-    }
-
     BusBuilder builder() {
         return BusBuilder.builder().useModLauncher();
     }
@@ -36,7 +33,7 @@ public class TestModLauncherBase {
 
     protected void doTest(ITestHandler handler) {
         if (System.getProperty(METHOD_NAME) != null) {
-            handler.test(this::validate, this::builder);
+            handler.test(this::builder);
         } else {
             String paths;
             try {
