@@ -1,9 +1,7 @@
 package net.neoforged.bus.test.general;
 
-import net.neoforged.bus.ListenerList;
 import net.neoforged.bus.api.BusBuilder;
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventListenerHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.test.ITestHandler;
 
@@ -34,43 +32,18 @@ public class AbstractEventListenerTest implements ITestHandler {
         assertTrue(concreteSuperEventHandled.get(), "handled concrete super event");
         assertTrue(abstractSubEventHandled.get(), "handled abstract sub event");
         assertTrue(concreteSubEventHandled.get(), "handled concrete sub event");
-        assertTrue(AbstractSubEvent.MERGED_STATIC_INIT == 100, "static init merge failed");
     }
 
-    /*
-     * Below, we simulate the things that are added by EventSubclassTransformer
-     * to show that it will work alongside the static listener map.
-     * We do not use the field name LISTNER_LIST as that's how we tell if the transformer has run
-     */
     public static abstract class AbstractSuperEvent extends Event {}
 
     public static class ConcreteSuperEvent extends AbstractSuperEvent {
-        private static ListenerList LISTENERS = new ListenerList(EventListenerHelper.getListenerList(ConcreteSuperEvent.class.getSuperclass()));
         public ConcreteSuperEvent() {}
-
-        @Override
-        public ListenerList getListenerList()
-        {
-            return LISTENERS;
-        }
     }
 
-    // In transformed world, this will have a 'LISTENER_LIST' injected.
-    // Make sure that it merges static init instead of overwrites
     public static class AbstractSubEvent extends ConcreteSuperEvent {
-        protected static int MERGED_STATIC_INIT = 100;
     }
 
     public static class ConcreteSubEvent extends AbstractSubEvent {
-        private static ListenerList LISTENERS = new ListenerList(EventListenerHelper.getListenerList(ConcreteSubEvent.class.getSuperclass()));
-
         public ConcreteSubEvent() {}
-
-        @Override
-        public ListenerList getListenerList()
-        {
-            return LISTENERS;
-        }
     }
-
 }

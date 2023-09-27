@@ -19,7 +19,6 @@
 
 package net.neoforged.bus.api;
 
-import net.neoforged.bus.EventSubclassTransformer;
 import net.neoforged.bus.ListenerList;
 
 import java.lang.annotation.Retention;
@@ -52,11 +51,8 @@ public class Event
     /**
      * Determine if this function is cancelable at all.
      * @return If access to setCanceled should be allowed
-     *
-     * Note:
-     * Events with the Cancelable annotation will have this method automatically added to return true.
      */
-    public boolean isCancelable()
+    public final boolean isCancelable()
     {
         return EventListenerHelper.isCancelable(this.getClass());
     }
@@ -65,7 +61,7 @@ public class Event
      * Determine if this event is canceled and should stop executing.
      * @return The current canceled state
      */
-    public boolean isCanceled()
+    public final boolean isCanceled()
     {
         return isCanceled;
     }
@@ -93,11 +89,8 @@ public class Event
 
     /**
      * Determines if this event expects a significant result value.
-     *
-     * Note:
-     * Events with the HasResult annotation will have this method automatically added to return true.
      */
-    public boolean hasResult()
+    public final boolean hasResult()
     {
         return EventListenerHelper.hasResult(this.getClass());
     }
@@ -105,7 +98,7 @@ public class Event
     /**
      * Returns the value set as the result of this event
      */
-    public Result getResult()
+    public final Result getResult()
     {
         return result;
     }
@@ -120,20 +113,21 @@ public class Event
      */
     public void setResult(Result value)
     {
+        if (!hasResult())
+        {
+            throw new UnsupportedOperationException(
+                    "Attempted to call Event#setResult() on an event without result of type: "
+                            + this.getClass().getCanonicalName()
+            );
+        }
         result = value;
     }
 
     /**
      * Returns a ListenerList object that contains all listeners
      * that are registered to this event.
-     *
-     * Note: for better efficiency, this gets overridden automatically
-     * using a Transformer, there is no need to override it yourself.
-     * @see EventSubclassTransformer
-     *
-     * @return Listener List
      */
-    public ListenerList getListenerList()
+    public final ListenerList getListenerList()
     {
         return EventListenerHelper.getListenerListInternal(this.getClass(), true);
     }
