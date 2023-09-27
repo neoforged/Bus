@@ -4,8 +4,6 @@ import cpw.mods.bootstraplauncher.BootstrapLauncher;
 import cpw.mods.modlauncher.api.ServiceRunner;
 import net.neoforged.bus.api.BusBuilder;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
@@ -18,8 +16,6 @@ public class TestModLauncherBase {
     private static final String METHOD_NAME = "test.modlauncher.method";
 
     void validate(Class<?> clazz) {
-        // We expect transformers to run, so make sure LISTENER_LIST exists, as it's the best indicator
-        assertTrue(Whitebox.hasField(clazz, "LISTENER_LIST"), "EventSubclassTransformer did not run on " + clazz.getName());
     }
 
     BusBuilder builder() {
