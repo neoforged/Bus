@@ -16,9 +16,11 @@ public class Whitebox {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T invokeMethod(final Object obj, final String methodName) {
+    public static <T> T invokeMethod(final Object obj, final String methodName, Object... args) {
         try {
-            return (T)Arrays.stream(obj.getClass().getMethods()).filter(m->m.getName().equals(methodName)).findFirst().orElseThrow().invoke(obj);
+            var method = Arrays.stream(obj.getClass().getDeclaredMethods()).filter(m->m.getName().equals(methodName)).findFirst().orElseThrow();
+            method.setAccessible(true);
+            return (T)method.invoke(obj, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
