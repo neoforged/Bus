@@ -19,8 +19,6 @@
 
 package net.neoforged.bus.api;
 
-import net.neoforged.bus.ListenerList;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -121,14 +119,5 @@ public class Event
             );
         }
         result = value;
-    }
-
-    /**
-     * Returns a ListenerList object that contains all listeners
-     * that are registered to this event.
-     */
-    public final ListenerList getListenerList()
-    {
-        return EventListenerHelper.getListenerListInternal(this.getClass(), true);
     }
 }

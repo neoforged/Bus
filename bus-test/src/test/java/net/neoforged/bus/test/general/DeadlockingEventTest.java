@@ -2,7 +2,6 @@ package net.neoforged.bus.test.general;
 
 import net.neoforged.bus.api.BusBuilder;
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventListenerHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.bus.test.ITestHandler;
@@ -35,7 +34,6 @@ public class DeadlockingEventTest implements ITestHandler {
 
     @Override
     public void after() {
-        Whitebox.invokeMethod(EventListenerHelper.class, "clearAll");
         final HashSet<AbstractQueuedSynchronizer> workers = Whitebox.getInternalState(THREAD_POOL, "workers");
         final List<Thread> threads = workers.stream().map(w -> Whitebox.<Thread>getInternalState(w, "thread")).collect(Collectors.toList());
         threads.stream().map(Thread::getStackTrace).forEach(ts->LogManager.getLogger().info("\n"+stack(ts)));
@@ -63,7 +61,6 @@ public class DeadlockingEventTest implements ITestHandler {
             final Class<? extends Event> clz = getClass("ChildEvent");
             Thread.sleep(0, nanos);
             LogManager.getLogger().info(System.nanoTime() - start);
-            assertEquals(clz.getConstructor().newInstance().getListenerList(), EventListenerHelper.getListenerList(clz));
             LogManager.getLogger().info("Task 2");
             return null;
         };

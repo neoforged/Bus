@@ -38,7 +38,7 @@ public class LockHelper<K,V> {
         this.backingMap = mapConstructor.apply(32); // reasonable initial size
     }
 
-    private Map<K, V> getReadMap() {
+    Map<K, V> getReadMap() {
         var map = readOnlyView;
         if (map == null) {
             // Need to update the read map

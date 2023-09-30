@@ -43,9 +43,8 @@ public abstract class ParallelEventTest implements ITestHandler {
 
             // Make sure it tracked them all
             busSet.forEach(bus -> {
-                int busid = Whitebox.getInternalState(bus, "busID");
-                ListenerList afterAdd = Whitebox.invokeMethod(new DummyEvent.GoodEvent(), "getListenerList");
-                assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length, "Failed to register all event handlers");
+                ListenerList afterAdd = Whitebox.invokeMethod(bus, "getListenerList", DummyEvent.GoodEvent.class);
+                assertEquals(LISTENER_COUNT, afterAdd.getListeners().length, "Failed to register all event handlers");
             });
 
             busSet.parallelStream().forEach(iEventBus -> { //post events parallel
@@ -70,9 +69,8 @@ public abstract class ParallelEventTest implements ITestHandler {
             toAdd.parallelStream().forEach(Runnable::run); //execute parallel listener adding
 
             // Make sure it tracked them all
-            int busid = Whitebox.getInternalState(bus, "busID");
-            ListenerList afterAdd = Whitebox.invokeMethod(new DummyEvent.GoodEvent(), "getListenerList");
-            assertEquals(LISTENER_COUNT, afterAdd.getListeners(busid).length, "Failed to register all event handlers");
+            ListenerList afterAdd = Whitebox.invokeMethod(bus, "getListenerList", DummyEvent.GoodEvent.class);
+            assertEquals(LISTENER_COUNT, afterAdd.getListeners().length, "Failed to register all event handlers");
 
             toAdd = new HashSet<>();
             for (int i = 0; i < RUN_ITERATIONS; i++) //prepare parallel event posting
