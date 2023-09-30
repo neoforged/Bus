@@ -73,14 +73,12 @@ public class ListenerList {
     }
 
     /**
-     * Returns a full list of all listeners for all priority levels.
+     * {@return a full list of all listeners for all priority levels}
      * Including all parent listeners.
      * <p>
      * List is returned in proper priority order.
      * <p>
      * Automatically rebuilds the internal Array cache if its information is out of date.
-     *
-     * @return Array containing listeners
      */
     public IEventListener[] getListeners() {
         if (shouldRebuild()) buildCache();
@@ -88,7 +86,7 @@ public class ListenerList {
     }
 
     protected boolean shouldRebuild() {
-        return rebuild;// || (parent != null && parent.shouldRebuild());
+        return rebuild;
     }
 
     protected void forceRebuild() {
