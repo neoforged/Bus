@@ -24,7 +24,7 @@ import net.neoforged.bus.api.*;
 import java.lang.reflect.*;
 import static org.objectweb.asm.Type.getMethodDescriptor;
 
-public class ASMEventHandler implements IEventListener {
+public class ASMEventHandler implements IEventListener, IWrapperListener {
 
     private final IEventListenerFactory factory;
     private final IEventListener handler;
@@ -84,5 +84,10 @@ public class ASMEventHandler implements IEventListener {
     public String toString()
     {
         return readable;
+    }
+
+    @Override
+    public IEventListener getWithoutCheck() {
+        return handler;
     }
 }

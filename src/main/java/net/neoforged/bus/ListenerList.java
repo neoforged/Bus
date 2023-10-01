@@ -19,8 +19,7 @@
 
 package net.neoforged.bus;
 
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventListener;
+import net.neoforged.bus.api.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,19 +35,23 @@ public class ListenerList {
     private ListenerList parent;
     private List<ListenerList> children;
     private Semaphore writeLock = new Semaphore(1, true);
+    private final boolean canUnwrapListeners;
 
-    ListenerList() {
+    ListenerList(Class<?> eventClass) {
         int count = EventPriority.values().length;
         priorities = new ArrayList<>(count);
 
         for (int x = 0; x < count; x++) {
             priorities.add(new ArrayList<>());
         }
+
+        // Unwrap if the event is not cancelable and not generic
+        canUnwrapListeners = !EventListenerHelper.isCancelable(eventClass) && !IGenericEvent.class.isAssignableFrom(eventClass);
     }
 
 
-    ListenerList(ListenerList parent) {
-        this();
+    ListenerList(Class<?> eventClass, ListenerList parent) {
+        this(eventClass);
         this.parent = parent;
         this.parent.addChild(this);
     }
@@ -116,6 +119,13 @@ public class ListenerList {
         Arrays.stream(EventPriority.values()).forEach(value -> {
             ret.addAll(getListeners(value));
         });
+        if (canUnwrapListeners) {
+            for (int i = 0; i < ret.size(); ++i) {
+                if (ret.get(i) instanceof IWrapperListener wrapper) {
+                    ret.set(i, wrapper.getWithoutCheck());
+                }
+            }
+        }
         this.listeners.set(ret.toArray(new IEventListener[0]));
         rebuild = false;
     }
