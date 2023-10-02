@@ -19,6 +19,8 @@
 
 package net.neoforged.bus.api;
 
+import net.neoforged.bus.EventListenerHelper;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 

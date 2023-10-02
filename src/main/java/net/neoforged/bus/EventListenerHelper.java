@@ -17,9 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.neoforged.bus.api;
+package net.neoforged.bus;
 
-import net.neoforged.bus.LockHelper;
+import net.neoforged.bus.api.Cancelable;
+import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.Event.HasResult;
 
 import java.lang.annotation.Annotation;
@@ -29,11 +30,11 @@ public class EventListenerHelper
     private static final LockHelper<Class<?>, Boolean> cancelable = LockHelper.withIdentityHashMap();
     private static final LockHelper<Class<?>, Boolean> hasResult = LockHelper.withIdentityHashMap();
 
-    static boolean isCancelable(Class<?> eventClass) {
+    public static boolean isCancelable(Class<?> eventClass) {
         return hasAnnotation(eventClass, Cancelable.class, cancelable);
     }
 
-    static boolean hasResult(Class<?> eventClass) {
+    public static boolean hasResult(Class<?> eventClass) {
         return hasAnnotation(eventClass, HasResult.class, hasResult);
     }
 
