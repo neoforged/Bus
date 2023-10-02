@@ -26,7 +26,9 @@ import java.lang.reflect.Type;
  * Subclasses should extend this if they wish to expose a secondary type based filter (the generic type).
  *
  * @param <T> The type to filter this generic event for
+ * @deprecated Use non-generic events instead, or another system.
  */
+@Deprecated(forRemoval = true)
 public class GenericEvent<T> extends Event implements IGenericEvent<T>
 {
     private Class<T> type;

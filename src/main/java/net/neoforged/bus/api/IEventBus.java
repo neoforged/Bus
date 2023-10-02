@@ -125,7 +125,9 @@ public interface IEventBus {
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
      * @param <F> The {@link Class} to filter the {@link GenericEvent} for
+     * @deprecated Use non-generic events instead, or another system.
      */
+    @Deprecated(forRemoval = true)
     <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Consumer<T> consumer);
 
     /**
@@ -138,7 +140,9 @@ public interface IEventBus {
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
      * @param <F> The {@link Class} to filter the {@link GenericEvent} for
+     * @deprecated Use non-generic events instead, or another system.
      */
+    @Deprecated(forRemoval = true)
     <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Consumer<T> consumer);
 
     /**
@@ -152,7 +156,9 @@ public interface IEventBus {
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
      * @param <F> The {@link Class} to filter the {@link GenericEvent} for
+     * @deprecated Use non-generic events instead, or another system.
      */
+    @Deprecated(forRemoval = true)
     <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCancelled, Consumer<T> consumer);
 
     /**
@@ -170,7 +176,9 @@ public interface IEventBus {
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
      * @param <F> The {@link Class} to filter the {@link GenericEvent} for
+     * @deprecated Use non-generic events instead, or another system.
      */
+    @Deprecated(forRemoval = true)
     <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer);
 
     /**

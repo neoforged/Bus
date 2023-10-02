@@ -32,6 +32,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 public class Event
 {
+    /**
+     * @deprecated Use a custom type and custom methods appropriate for your event,
+     *             instead of the overly general {@link Event.Result} enum.
+     *             {@link Event#getResult()} and {@link Event#setResult(Result)}
+     *             will be removed in a future version.
+     */
+    @Deprecated(forRemoval = true)
     @Retention(value = RUNTIME)
     @Target(value = TYPE)
     public @interface HasResult{}

@@ -24,7 +24,9 @@ import java.lang.reflect.Type;
  * Provides a generic event - one that is able to be filtered based on the supplied Generic type
  *
  * @param <T> The filtering type
+ * @deprecated Use non-generic events instead, or another system.
  */
+@Deprecated(forRemoval = true)
 public interface IGenericEvent<T>
 {
     Type getGenericType();
