@@ -8,7 +8,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
  * Listeners registered to the event bus will not receive {@link #isCanceled() canceled} events,
  * unless they were registered with {@code receiveCanceled = true}.
  */
-public interface CancellableEvent {
+public interface ICancellableEvent {
     /**
      * Sets the cancel state of this event.
      *
@@ -18,7 +18,7 @@ public interface CancellableEvent {
      *
      * <p>This method may be overridden to react to cancellation of the event,
      * however a super call must always be made as follows:
-     * {@code CancellableEvent.super.setCanceled(canceled);}
+     * {@code ICancellableEvent.super.setCanceled(canceled);}
      */
     @MustBeInvokedByOverriders
     default void setCanceled(boolean canceled) {

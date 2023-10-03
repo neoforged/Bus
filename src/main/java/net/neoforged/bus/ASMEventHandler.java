@@ -71,13 +71,13 @@ public class ASMEventHandler implements IEventListener, IWrapperListener {
             if (isGeneric)
             {
                 if (filter == null || filter == ((IGenericEvent)event).getGenericType()) {
-                    if (!(event instanceof CancellableEvent cancellableEvent) || !cancellableEvent.isCanceled()) {
+                    if (!(event instanceof ICancellableEvent cancellableEvent) || !cancellableEvent.isCanceled()) {
                         handler.invoke(event);
                     }
                 }
             } else {
                 // The cast is safe because the check is removed if the event is not cancellable
-                if (!((CancellableEvent) event).isCanceled()) {
+                if (!((ICancellableEvent) event).isCanceled()) {
                     handler.invoke(event);
                 }
             }

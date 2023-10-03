@@ -128,7 +128,7 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Consumer<T> consumer);
 
     /**
      * Add a consumer listener with the specified {@link EventPriority} and not receiving canceled events,
@@ -143,7 +143,7 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Consumer<T> consumer);
 
     /**
      * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events,
@@ -159,7 +159,7 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCanceled, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCanceled, Consumer<T> consumer);
 
     /**
      * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events,
@@ -179,7 +179,7 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
 
     /**
      * Unregister the supplied listener from this EventBus.
