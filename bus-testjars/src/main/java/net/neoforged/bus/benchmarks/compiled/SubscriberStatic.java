@@ -7,7 +7,7 @@ public class SubscriberStatic
 {
 
     @SubscribeEvent
-    public static void onCancelableEvent(CancelableEvent event)
+    public static void onCancellableEvent(CancellableEvent event)
     {
 
     }

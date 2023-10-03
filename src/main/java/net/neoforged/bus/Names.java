@@ -9,8 +9,8 @@ class Names {
     static final String HAS_RESULT = "Lnet/neoforged/bus/api/Event$HasResult;";
     static final Method HAS_RESULT_M = new Method("hasResult", getMethodDescriptor(BOOLEAN_TYPE));
 
-    static final String CANCELLABLE = "Lnet/neoforged/bus/api/Cancelable;";
-    static final Method CANCELABLE_M = new Method("isCancelable", getMethodDescriptor(BOOLEAN_TYPE));
+    static final String CANCELLABLE = "Lnet/neoforged/bus/api/Cancellable;";
+    static final Method CANCELLABLE_M = new Method("isCancellable", getMethodDescriptor(BOOLEAN_TYPE));
 
     static final String LISTENER_LIST = "Lnet/neoforged/bus/ListenerList;";
     static final Method LISTENER_LIST_INIT = new Method("<init>", getMethodDescriptor(VOID_TYPE, getType(LISTENER_LIST)));

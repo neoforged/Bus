@@ -1,7 +1,7 @@
 package net.neoforged.bus.test.general;
 
 import net.neoforged.bus.api.BusBuilder;
-import net.neoforged.bus.api.Cancelable;
+import net.neoforged.bus.api.CancellableEvent;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.test.ITestHandler;
@@ -66,20 +66,20 @@ public abstract class LambdaHandlerTest implements ITestHandler {
             // pathological test because you can't derive the lambda types in all cases...
             // I don't quite understand what this is testing, Care to enlighten me cpw? --Lex
             IEventBus bus = builder.get().build();
-            registerSomeGodDamnWrapper(bus, CancellableEvent.class, this::subEventFunction);
-            final CancellableEvent event = new CancellableEvent();
+            registerSomeGodDamnWrapper(bus, TestCancellableEvent.class, this::subEventFunction);
+            final TestCancellableEvent event = new TestCancellableEvent();
             bus.post(event);
-            assertTrue(event.isCanceled(), "Event got cancelled");
+            assertTrue(event.isCanceled(), "Event got canceled");
             final SubEvent subevent = new SubEvent();
             bus.post(subevent);
         }
 
-        private boolean subEventFunction(final CancellableEvent event) {
-            return event instanceof CancellableEvent;
+        private boolean subEventFunction(final TestCancellableEvent event) {
+            return event instanceof TestCancellableEvent;
         }
     }
 
-    public <T extends Event> void registerSomeGodDamnWrapper(IEventBus bus, Class<T> tClass, Function<T, Boolean> func) {
+    public <T extends Event & CancellableEvent> void registerSomeGodDamnWrapper(IEventBus bus, Class<T> tClass, Function<T, Boolean> func) {
         bus.addListener(tClass, (T event) -> {
             if (func.apply(event)) {
                 event.setCanceled(true);
@@ -89,6 +89,5 @@ public abstract class LambdaHandlerTest implements ITestHandler {
 
     public static class SubEvent extends Event {}
 
-    @Cancelable
-    public static class CancellableEvent extends Event {}
+    public static class TestCancellableEvent extends Event implements CancellableEvent {}
 }

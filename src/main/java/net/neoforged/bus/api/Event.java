@@ -50,49 +50,10 @@ public class Event
         ALLOW
     }
 
-    private boolean isCanceled = false;
+    boolean isCanceled = false;
     private Result result = Result.DEFAULT;
 
     public Event() { }
-
-    /**
-     * Determine if this function is cancelable at all.
-     * @return If access to setCanceled should be allowed
-     */
-    public final boolean isCancelable()
-    {
-        return EventListenerHelper.isCancelable(this.getClass());
-    }
-
-    /**
-     * Determine if this event is canceled and should stop executing.
-     * @return The current canceled state
-     */
-    public final boolean isCanceled()
-    {
-        return isCanceled;
-    }
-
-    /**
-     * Sets the cancel state of this event. Note, not all events are cancelable, and any attempt to
-     * invoke this method on an event that is not cancelable (as determined by {@link #isCancelable}
-     * will result in an {@link UnsupportedOperationException}.
-     *
-     * The functionality of setting the canceled state is defined on a per-event bases.
-     *
-     * @param cancel The new canceled value
-     */
-    public void setCanceled(boolean cancel)
-    {
-        if (!isCancelable())
-        {
-            throw new UnsupportedOperationException(
-                "Attempted to call Event#setCanceled() on a non-cancelable event of type: "
-                + this.getClass().getCanonicalName()
-            );
-        }
-        isCanceled = cancel;
-    }
 
     /**
      * Determines if this event expects a significant result value.

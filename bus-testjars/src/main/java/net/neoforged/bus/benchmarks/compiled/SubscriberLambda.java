@@ -7,12 +7,12 @@ public class SubscriberLambda
 
     public static void register(IEventBus bus)
     {
-        bus.addListener(SubscriberLambda::onCancelableEvent);
+        bus.addListener(SubscriberLambda::onCancellableEvent);
         bus.addListener(SubscriberLambda::onResultEvent);
         bus.addListener(SubscriberLambda::onSimpleEvent);
     }
 
-    public static void onCancelableEvent(CancelableEvent event)
+    public static void onCancellableEvent(CancellableEvent event)
     {
 
     }
