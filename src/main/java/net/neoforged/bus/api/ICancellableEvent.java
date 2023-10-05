@@ -26,7 +26,7 @@ public interface ICancellableEvent {
     }
 
     /**
-     * Returns the canceled state of this event.
+     * {@return the canceled state of this event}
      */
     @ApiStatus.NonExtendable
     default boolean isCanceled() {
