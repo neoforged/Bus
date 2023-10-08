@@ -319,7 +319,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     @Override
     public < T extends Event> T post(T event, IEventBusInvokeDispatcher wrapper)
     {
-        if (shutdown) return event;
+        if (shutdown)
+        {
+            throw new IllegalStateException("Attempted to post event of type " +
+                    event.getClass().getSimpleName() + " on a bus that was not started yet!");
+        }
         if (checkTypesOnDispatch)
         {
             try {
@@ -351,13 +355,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     public void handleException(IEventBus bus, Event event, IEventListener[] listeners, int index, Throwable throwable)
     {
         LOGGER.error(EVENTBUS, ()->new EventBusErrorMessage(event, index, listeners, throwable));
-    }
-
-    @Override
-    public void shutdown()
-    {
-        LOGGER.fatal(EVENTBUS, "EventBus shutting down - future events will not be posted.", new Exception("stacktrace"));
-        this.shutdown = true;
     }
 
     @Override

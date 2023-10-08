@@ -211,13 +211,5 @@ public interface IEventBus {
      */
     <T extends Event> T post(T event, IEventBusInvokeDispatcher wrapper);
 
-    /**
-     * Shuts down this event bus.
-     *
-     * No future events will be fired on this event bus, so any call to {@link #post(Event)} will be a no op after this method has been invoked
-     */
-    void shutdown();
-
-
     void start();
 }
