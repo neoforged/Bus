@@ -1,80 +1,79 @@
 package net.neoforged.bus.test;
 
 import cpw.mods.bootstraplauncher.BootstrapLauncher;
+import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.ServiceRunner;
 import net.neoforged.bus.api.BusBuilder;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Modifier;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 
 public class TestModLauncherBase {
     private static final String CLASS_NAME = "test.modlauncher.class";
     private static final String METHOD_NAME = "test.modlauncher.method";
+    private static final String RUNNING_TEST = "test.modlauncher.running";
+
+    private static TransformingClassLoader classLoader;
 
     BusBuilder builder() {
         return BusBuilder.builder().useModLauncher();
     }
 
-    @BeforeEach
-    public void setup() {
-        System.clearProperty(CLASS_NAME);
-        System.clearProperty(METHOD_NAME);
-    }
+    @BeforeAll
+    public static void setupTransformingClassLoader() {
+        String paths;
+        try {
+            paths = MockTransformerService.getTestJarsPath() + "," + MockTransformerService.getBasePath();
+        } catch (Exception e) {
+            if (e instanceof RuntimeException re)
+                throw re;
+            throw new RuntimeException(e);
+        }
+        System.setProperty("test.harness.game", paths);
+        System.setProperty("test.harness.callable", TestCallback.class.getName());
+        BootstrapLauncher.main("--version", "1.0", "--launchTarget", "testharness");
 
-    @AfterEach
-    public void teardown() {
-        System.clearProperty(CLASS_NAME);
-        System.clearProperty(METHOD_NAME);
+        if (!(Thread.currentThread().getContextClassLoader() instanceof TransformingClassLoader transformingClassLoader))
+            throw new RuntimeException("Failed to setup transforming class loader.");
+
+        classLoader = transformingClassLoader;
     }
 
     protected void doTest(ITestHandler handler) {
-        if (System.getProperty(METHOD_NAME) != null) {
+        if (System.getProperty(RUNNING_TEST) != null) {
+            handler.before(this::builder);
             handler.test(this::builder);
+            handler.after(this::builder);
         } else {
-            String paths;
-            try {
-                paths = MockTransformerService.getTestJarsPath() + "," + MockTransformerService.getBasePath();
-            } catch (Exception e) {
-                if (e instanceof RuntimeException re)
-                    throw re;
-                throw new RuntimeException(e);
-            }
+            // Otherwise: reload the class in the transforming class loader.
+            // WARNING: terrible hack!
             var method = handler.getClass().getEnclosingMethod();
-            System.setProperty(CLASS_NAME, method.getDeclaringClass().getName());
-            System.setProperty(METHOD_NAME, method.getName());
-            System.setProperty("test.harness.game", paths);
-            System.setProperty("test.harness.callable", TestCallback.class.getName());
-            BootstrapLauncher.main("--version", "1.0", "--launchTarget", "testharness");
+            var methodName = method.getName();
+            var className = method.getDeclaringClass().getName();
+
+            try {
+                var inst = Class.forName(className, true, classLoader).getConstructor().newInstance();
+
+                getClass().getModule().addReads(inst.getClass().getModule());
+                var handle = MethodHandles.lookup().findVirtual(inst.getClass(), methodName, MethodType.methodType(void.class));
+
+                System.setProperty(RUNNING_TEST, "true");
+
+                handle.invoke(inst);
+            } catch (Throwable ex) {
+                throw new RuntimeException("Failed to run test with transforming class loader", ex);
+            } finally {
+                System.clearProperty(RUNNING_TEST);
+            }
         }
     }
 
     public static class TestCallback {
         public static ServiceRunner supplier() {
-            return new ServiceRunner() {
-                // This was originally written to allow us to have cleaner nested classes, but JUnit doesn't run tests inside non-static classes.
-                // Leaving this here because why not...
-                private Object getInstance(Class<?> clazz) throws Throwable {
-                    Class<?> outer = clazz.getEnclosingClass();
-                    if (outer == null || Modifier.isStatic(clazz.getModifiers()))
-                        return clazz.getConstructor().newInstance();
-
-                    var pinst = getInstance(outer);
-                    var inst = clazz.getConstructor(outer).newInstance(pinst);
-                    return inst;
-                }
-
-                @Override
-                public void run() throws Throwable {
-                    String method = System.getProperty(METHOD_NAME);
-                    var inst = getInstance(Class.forName(System.getProperty(CLASS_NAME), true, Thread.currentThread().getContextClassLoader()));
-                    var handle = MethodHandles.lookup().findVirtual(inst.getClass(), method, MethodType.methodType(void.class));
-                    handle.invoke(inst);
-                }
-            };
+            // Return a NO-OP ServiceRunner to continue JUnit testing.
+            return ServiceRunner.NOOP;
         }
     }
 }
