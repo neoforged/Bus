@@ -11,8 +11,6 @@ import java.lang.invoke.MethodType;
 import org.junit.jupiter.api.BeforeAll;
 
 public class TestModLauncherBase {
-    private static final String CLASS_NAME = "test.modlauncher.class";
-    private static final String METHOD_NAME = "test.modlauncher.method";
     private static final String RUNNING_TEST = "test.modlauncher.running";
 
     private static TransformingClassLoader classLoader;
