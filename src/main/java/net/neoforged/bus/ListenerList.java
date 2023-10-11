@@ -45,8 +45,8 @@ public class ListenerList {
             priorities.add(new ArrayList<>());
         }
 
-        // Unwrap if the event is not cancelable and not generic
-        canUnwrapListeners = !EventListenerHelper.isCancelable(eventClass) && !IGenericEvent.class.isAssignableFrom(eventClass);
+        // Unwrap if the event is not cancellable and not generic
+        canUnwrapListeners = !ICancellableEvent.class.isAssignableFrom(eventClass) && !IGenericEvent.class.isAssignableFrom(eventClass);
     }
 
 

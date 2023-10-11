@@ -29,6 +29,7 @@ public class ASMEventHandler implements IEventListener, IWrapperListener {
     private final IEventListenerFactory factory;
     private final IEventListener handler;
     private final SubscribeEvent subInfo;
+    private final boolean isGeneric;
     private String readable;
     private Type filter = null;
 
@@ -38,6 +39,7 @@ public class ASMEventHandler implements IEventListener, IWrapperListener {
 
         subInfo = method.getAnnotation(SubscribeEvent.class);
         readable = "ASM: " + target + " " + method.getName() + getMethodDescriptor(method);
+        this.isGeneric = isGeneric;
         if (isGeneric)
         {
             Type type = method.getGenericParameterTypes()[0];
@@ -66,10 +68,16 @@ public class ASMEventHandler implements IEventListener, IWrapperListener {
     {
         if (handler != null)
         {
-            if (!event.isCanceled() || subInfo.receiveCanceled())
+            if (isGeneric)
             {
-                if (filter == null || filter == ((IGenericEvent)event).getGenericType())
-                {
+                if (filter == null || filter == ((IGenericEvent)event).getGenericType()) {
+                    if (!(event instanceof ICancellableEvent cancellableEvent) || !cancellableEvent.isCanceled()) {
+                        handler.invoke(event);
+                    }
+                }
+            } else {
+                // The cast is safe because the check is removed if the event is not cancellable
+                if (!((ICancellableEvent) event).isCanceled()) {
                     handler.invoke(event);
                 }
             }

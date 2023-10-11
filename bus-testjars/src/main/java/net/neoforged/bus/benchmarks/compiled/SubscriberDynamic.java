@@ -7,7 +7,7 @@ public class SubscriberDynamic
 {
 
     @SubscribeEvent
-    public void onCancelableEvent(CancelableEvent event)
+    public void onCancellableEvent(CancellableEvent event)
     {
 
     }

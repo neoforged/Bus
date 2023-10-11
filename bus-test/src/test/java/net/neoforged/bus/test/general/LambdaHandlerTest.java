@@ -1,7 +1,7 @@
 package net.neoforged.bus.test.general;
 
 import net.neoforged.bus.api.BusBuilder;
-import net.neoforged.bus.api.Cancelable;
+import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.test.ITestHandler;
@@ -69,7 +69,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
             registerSomeGodDamnWrapper(bus, CancellableEvent.class, this::subEventFunction);
             final CancellableEvent event = new CancellableEvent();
             bus.post(event);
-            assertTrue(event.isCanceled(), "Event got cancelled");
+            assertTrue(event.isCanceled(), "Event got canceled");
             final SubEvent subevent = new SubEvent();
             bus.post(subevent);
         }
@@ -79,7 +79,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
         }
     }
 
-    public <T extends Event> void registerSomeGodDamnWrapper(IEventBus bus, Class<T> tClass, Function<T, Boolean> func) {
+    public <T extends Event & ICancellableEvent> void registerSomeGodDamnWrapper(IEventBus bus, Class<T> tClass, Function<T, Boolean> func) {
         bus.addListener(tClass, (T event) -> {
             if (func.apply(event)) {
                 event.setCanceled(true);
@@ -89,6 +89,5 @@ public abstract class LambdaHandlerTest implements ITestHandler {
 
     public static class SubEvent extends Event {}
 
-    @Cancelable
-    public static class CancellableEvent extends Event {}
+    public static class CancellableEvent extends Event implements ICancellableEvent {}
 }

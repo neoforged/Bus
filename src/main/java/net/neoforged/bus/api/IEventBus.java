@@ -30,7 +30,7 @@ public interface IEventBus {
     void register(Object target);
 
     /**
-     * Add a consumer listener with default {@link EventPriority#NORMAL} and not recieving cancelled events.
+     * Add a consumer listener with default {@link EventPriority#NORMAL} and not recieving canceled events.
      *
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
@@ -38,7 +38,7 @@ public interface IEventBus {
     <T extends Event> void addListener(Consumer<T> consumer);
 
     /**
-     * Add a consumer listener not receiving cancelled events.
+     * Add a consumer listener not receiving canceled events.
      *
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
@@ -50,7 +50,7 @@ public interface IEventBus {
     <T extends Event> void addListener(Class<T> eventType, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and not receiving cancelled events.
+     * Add a consumer listener with the specified {@link EventPriority} and not receiving canceled events.
      *
      * @param priority {@link EventPriority} for this listener
      * @param consumer Callback to invoke when a matching event is received
@@ -59,7 +59,7 @@ public interface IEventBus {
     <T extends Event> void addListener(EventPriority priority, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and not receiving cancelled events.
+     * Add a consumer listener with the specified {@link EventPriority} and not receiving canceled events.
      *
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
@@ -72,50 +72,50 @@ public interface IEventBus {
     <T extends Event> void addListener(EventPriority priority, Class<T> eventType, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and potentially cancelled events.
+     * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events.
      *
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCancelled Indicate if this listener should receive events that have been {@link Cancelable} cancelled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
      */
-    <T extends Event> void addListener(EventPriority priority, boolean receiveCancelled, Consumer<T> consumer);
+    <T extends Event> void addListener(EventPriority priority, boolean receiveCanceled, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and potentially cancelled events.
+     * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events.
      *
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
      *
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCancelled Indicate if this listener should receive events that have been {@link Cancelable} cancelled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
      * @param eventType The concrete {@link Event} subclass to subscribe to
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
      */
-    <T extends Event> void addListener(EventPriority priority, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer);
+    <T extends Event> void addListener(EventPriority priority, boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener receiving potentially cancelled events.
+     * Add a consumer listener receiving potentially canceled events.
      *
-     * @param receiveCancelled Indicate if this listener should receive events that have been {@link Cancelable} cancelled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
      */
-    <T extends Event> void addListener(boolean receiveCancelled, Consumer<T> consumer);
+    <T extends Event> void addListener(boolean receiveCanceled, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener receiving potentially cancelled events.
+     * Add a consumer listener receiving potentially canceled events.
      *
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
      *
-     * @param receiveCancelled Indicate if this listener should receive events that have been {@link Cancelable} cancelled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
      * @param eventType The concrete {@link Event} subclass to subscribe to
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
      */
-    <T extends Event> void addListener(boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer);
+    <T extends Event> void addListener(boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
 
     /**
      * Add a consumer listener for a {@link GenericEvent} subclass, filtered to only be called for the specified
@@ -128,10 +128,10 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and not receiving cancelled events,
+     * Add a consumer listener with the specified {@link EventPriority} and not receiving canceled events,
      * for a {@link GenericEvent} subclass, filtered to only be called for the specified
      * filter {@link Class}.
      *
@@ -143,26 +143,26 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and potentially cancelled events,
+     * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events,
      * for a {@link GenericEvent} subclass, filtered to only be called for the specified
      * filter {@link Class}.
      *
      * @param genericClassFilter A {@link Class} which the {@link GenericEvent} should be filtered for
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCancelled Indicate if this listener should receive events that have been {@link Cancelable} cancelled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
      * @param <F> The {@link Class} to filter the {@link GenericEvent} for
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCancelled, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCanceled, Consumer<T> consumer);
 
     /**
-     * Add a consumer listener with the specified {@link EventPriority} and potentially cancelled events,
+     * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events,
      * for a {@link GenericEvent} subclass, filtered to only be called for the specified
      * filter {@link Class}.
 
@@ -171,7 +171,7 @@ public interface IEventBus {
      *
      * @param genericClassFilter A {@link Class} which the {@link GenericEvent} should be filtered for
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCancelled Indicate if this listener should receive events that have been {@link Cancelable} cancelled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
      * @param eventType The concrete {@link GenericEvent} subclass to subscribe to
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
@@ -179,7 +179,7 @@ public interface IEventBus {
      * @deprecated Use non-generic events instead, or another system.
      */
     @Deprecated(forRemoval = true)
-    <T extends GenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer);
+    <T extends Event & IGenericEvent<? extends F>, F> void addGenericListener(Class<F> genericClassFilter, EventPriority priority, boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
 
     /**
      * Unregister the supplied listener from this EventBus.
@@ -194,30 +194,26 @@ public interface IEventBus {
 
     /**
      * Submit the event for dispatch to appropriate listeners
+     * <p>
+     * If the bus is not started yet, an exception will be thrown.
      *
      * @param event The event to dispatch to listeners
-     * @return true if the event was {@link Cancelable} cancelled
+     * @return the event that was passed in
      */
-    boolean post(Event event);
+    <T extends Event> T post(T event);
 
     /**
      * Submit the event for dispatch to listeners. The invoke wrapper allows for
      * wrap handling of the actual dispatch, to allow for monitoring of individual event
      * dispatch
+     * <p>
+     * If the bus is not started yet, an exception will be thrown.
      *
      * @param event The event to dispatch to listeners
      * @param wrapper A wrapper function to handle actual dispatch
-     * @return true if the event was {@link Cancelable} cancelled
+     * @return the event that was passed in
      */
-    boolean post(Event event, IEventBusInvokeDispatcher wrapper);
-
-    /**
-     * Shuts down this event bus.
-     *
-     * No future events will be fired on this event bus, so any call to {@link #post(Event)} will be a no op after this method has been invoked
-     */
-    void shutdown();
-
+    <T extends Event> T post(T event, IEventBusInvokeDispatcher wrapper);
 
     void start();
 }
