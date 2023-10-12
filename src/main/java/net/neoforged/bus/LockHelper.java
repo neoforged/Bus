@@ -60,10 +60,14 @@ public class LockHelper<K,V> {
     }
 
     public V computeIfAbsent(K key, Supplier<V> factory) {
+        return computeIfAbsent(key, k -> factory.get(), Function.identity());
+    }
+
+    public V computeIfAbsent(K key, Function<K, V> factory) {
         return computeIfAbsent(key, factory, Function.identity());
     }
 
-    public <I> V computeIfAbsent(K key, Supplier<I> factory, Function<I, V> finalizer) {
+    public <I> V computeIfAbsent(K key, Function<K, I> factory, Function<I, V> finalizer) {
         // Try lock-free get first
         var ret = get(key);
         if (ret != null)
@@ -72,7 +76,7 @@ public class LockHelper<K,V> {
         // Let's pre-compute our new value. This could take a while, as well as recursively call this
         // function. as such, we need to make sure we don't hold a lock when we do this, otherwise
         // we could conflict with the class init global lock that is implicitly present
-        var intermediate = factory.get();
+        var intermediate = factory.apply(key);
 
         // having computed a value, we'll grab the lock.
         synchronized (lock) {

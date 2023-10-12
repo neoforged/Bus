@@ -30,9 +30,9 @@ public class ClassLoaderFactory implements IEventListenerFactory {
 
 
     protected Class<?> createWrapper(Method callback) throws ClassNotFoundException {
-        return cache.computeIfAbsent(callback, () -> {
+        return cache.computeIfAbsent(callback, cb -> {
             var node = new ClassNode();
-            transformNode(getUniqueName(callback), callback, node);
+            transformNode(getUniqueName(cb), cb, node);
             return node;
         }, ClassLoaderFactory::defineClass);
     }

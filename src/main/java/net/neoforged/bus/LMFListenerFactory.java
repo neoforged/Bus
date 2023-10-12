@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
@@ -16,8 +17,9 @@ public class LMFListenerFactory implements IEventListenerFactory {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final MethodHandles.Lookup IMPL_LOOKUP;
 
+    private static final LockHelper<Method, MethodHandle> eventListenerFactories = LockHelper.withHashMap();
+
     static {
-        MethodHandles.Lookup implLookup = null;
         try {
             var hackfield = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
             hackfield.setAccessible(true);
@@ -29,33 +31,49 @@ public class LMFListenerFactory implements IEventListenerFactory {
 
     private static final MethodType LISTENER_INVOKE = MethodType.methodType(void.class, Event.class);
 
+    private static MethodHandle getEventListenerFactory(Method m) {
+        return eventListenerFactories.computeIfAbsent(m, callback -> {
+            try {
+                var callbackClass = callback.getDeclaringClass();
+                var lookup = IMPL_LOOKUP.in(callbackClass);
+
+                if (Modifier.isStatic(callback.getModifiers())) {
+                    return LambdaMetafactory.metafactory(
+                            lookup,
+                            "invoke",
+                            MethodType.methodType(IEventListener.class),
+                            LISTENER_INVOKE,
+                            lookup.unreflect(callback),
+                            MethodType.methodType(void.class, callback.getParameterTypes()[0])
+                    ).getTarget();
+                } else {
+                    return LambdaMetafactory.metafactory(
+                            lookup,
+                            "invoke",
+                            MethodType.methodType(IEventListener.class, callbackClass),
+                            LISTENER_INVOKE,
+                            lookup.unreflect(callback),
+                            MethodType.methodType(void.class, callback.getParameterTypes()[0])
+                    ).getTarget();
+                }
+            } catch (Throwable e) {
+                throw new RuntimeException("Failed to create IEventListener factory", e);
+            }
+        });
+    }
+
     @Override
-    public IEventListener create(Method callback, Object target) throws IllegalAccessException {
+    public IEventListener create(Method callback, Object target) {
         try {
-            var callbackClass = callback.getDeclaringClass();
-            var lookup = IMPL_LOOKUP.in(callbackClass);
+            var factory = getEventListenerFactory(callback);
 
             if (Modifier.isStatic(callback.getModifiers())) {
-                return (IEventListener) LambdaMetafactory.metafactory(
-                        lookup,
-                        "invoke",
-                        MethodType.methodType(IEventListener.class),
-                        LISTENER_INVOKE,
-                        lookup.unreflect(callback),
-                        MethodType.methodType(void.class, callback.getParameterTypes()[0])
-                ).getTarget().invoke();
+                return (IEventListener) factory.invoke();
             } else {
-                return (IEventListener) LambdaMetafactory.metafactory(
-                        lookup,
-                        "invoke",
-                        MethodType.methodType(IEventListener.class, callbackClass),
-                        LISTENER_INVOKE,
-                        lookup.unreflect(callback),
-                        MethodType.methodType(void.class, callback.getParameterTypes()[0])
-                ).getTarget().invoke(target);
+                return (IEventListener) factory.invoke(target);
             }
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to create IEventListener", e);
         }
     }
 }
