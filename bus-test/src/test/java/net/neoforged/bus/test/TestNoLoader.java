@@ -1,23 +1,9 @@
 package net.neoforged.bus.test;
 
-import org.junit.jupiter.api.Test;
-
-import net.neoforged.bus.test.general.AbstractEventListenerTest;
-import net.neoforged.bus.test.general.DeadlockingEventTest;
-import net.neoforged.bus.test.general.EventBusSubtypeFilterTest;
-import net.neoforged.bus.test.general.EventClassCheckTest;
-import net.neoforged.bus.test.general.EventFiringEventTest;
-import net.neoforged.bus.test.general.EventHandlerExceptionTest;
-import net.neoforged.bus.test.general.GenericListenerTests;
-import net.neoforged.bus.test.general.LambdaHandlerTest;
-import net.neoforged.bus.test.general.NonPublicEventHandler;
-import net.neoforged.bus.test.general.ParallelEventTest;
-import net.neoforged.bus.test.general.ParentHandlersGetInvokedTest;
-import net.neoforged.bus.test.general.ParentHandlersGetInvokedTestDummy;
-import net.neoforged.bus.test.general.ThreadedListenerExceptionTest;
-
+import net.neoforged.bus.test.general.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 public class TestNoLoader extends TestNoLoaderBase {
 
@@ -117,9 +103,13 @@ public class TestNoLoader extends TestNoLoaderBase {
         doTest(new GenericListenerTests.Wildcard() {});
     }
 
-    @Disabled //TODO: Do we want to add checks for this? By Default the methods just silent are ignored.
     @Test
     public void testNonPublicEventHandler() {
-        doTest(new NonPublicEventHandler(false) {});
+        doTest(new NonPublicEventHandler() {});
+    }
+
+    @Test
+    public void testCommonSubscribeEventErrors() {
+        doTest(new CommonSubscribeEventErrorsTest() {});
     }
 }

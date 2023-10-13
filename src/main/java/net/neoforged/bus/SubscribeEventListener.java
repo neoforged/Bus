@@ -27,14 +27,14 @@ import static org.objectweb.asm.Type.getMethodDescriptor;
 /**
  * Wrapper around an event handler generated for a {@link SubscribeEvent} method.
  */
-public class SubscribeEventHandler implements IEventListener, IWrapperListener {
+class SubscribeEventListener implements IEventListener, IWrapperListener {
     private final IEventListener handler;
     private final SubscribeEvent subInfo;
     private final boolean isGeneric;
     private String readable;
     private Type filter = null;
 
-    public SubscribeEventHandler(Object target, Method method, boolean isGeneric) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+    public SubscribeEventListener(Object target, Method method, boolean isGeneric) {
         handler = EventListenerFactory.create(method, target);
 
         subInfo = method.getAnnotation(SubscribeEvent.class);

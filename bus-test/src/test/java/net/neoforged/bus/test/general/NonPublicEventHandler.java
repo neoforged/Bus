@@ -11,37 +11,30 @@ import net.neoforged.bus.test.ITestHandler;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NonPublicEventHandler implements ITestHandler {
-    private final boolean hasTransformer;
     private static boolean hit = false;
-
-    public NonPublicEventHandler(boolean hasTransformer) {
-        this.hasTransformer = hasTransformer;
-    }
 
     @Override
     public void test(Supplier<BusBuilder> builder) {
         var bus = builder.get().build();
-        assertDoesNotThrow(() -> bus.register(new PUBLIC()));
-        testCall(bus, true, "PUBLIC");
-
-        if (hasTransformer) {
-            assertDoesNotThrow(() -> bus.register(new PROTECTED()));
-            testCall(bus, true, "PROTECTED");
-            assertDoesNotThrow(() -> bus.register(new DEFAULT()));
-            testCall(bus, true, "DEFAULT");
-            //assertDoesNotThrow(() -> bus.register(new PRIVATE()));
-            //testCall(bus, true, "PRIVATE");
-        } else {
-            assertThrows(IllegalArgumentException.class, () -> bus.register(new PROTECTED()));
-            assertThrows(IllegalArgumentException.class, () -> bus.register(new DEFAULT()));
-            //assertThrows(IllegalArgumentException.class, () -> bus.register(new PRIVATE()));
-        }
+        testCall(bus, new PUBLIC(), "PUBLIC");
+        testCall(bus, new PROTECTED(), "PROTECTED");
+        testCall(bus, new DEFAULT(), "DEFAULT");
+        testCall(bus, new PRIVATE(), "PRIVATE");
     }
 
-    private void testCall(IEventBus bus, boolean expected, String name) {
+    private void testCall(IEventBus bus, Object listenerObject, String name) {
+        // Register
+        assertDoesNotThrow(() -> bus.register(listenerObject));
+        // Post
         hit = false;
         bus.post(new Event());
-        assertEquals(expected, hit, name + " did not behave correctly");
+        assertTrue(hit, name + " did not behave correctly: failed to hit");
+        // Unregister
+        bus.unregister(listenerObject);
+        // Make sure we could unregister
+        hit = false;
+        bus.post(new Event());
+        assertFalse(hit, name + " did not behave correctly: failed to unregister");
     }
 
     public static class PUBLIC {
@@ -50,14 +43,6 @@ public class NonPublicEventHandler implements ITestHandler {
             hit = true;
         }
     }
-    /* This will error in our transformer, and there isnt a way to test that.
-    public static class PRIVATE {
-        @SubscribeEvent
-        private void handler(Event e) {
-            hit = true;
-        }
-    }
-    */
     public static class PROTECTED {
         @SubscribeEvent
         protected void handler(Event e) {
@@ -67,6 +52,12 @@ public class NonPublicEventHandler implements ITestHandler {
     public static class DEFAULT {
         @SubscribeEvent
         void handler(Event e) {
+            hit = true;
+        }
+    }
+    public static class PRIVATE {
+        @SubscribeEvent
+        private void handler(Event e) {
             hit = true;
         }
     }
