@@ -10,7 +10,6 @@ public final class BusBuilderImpl implements BusBuilder {
     boolean startShutdown = false;
     boolean checkTypesOnDispatch = false;
     IEventClassChecker classChecker = eventClass -> {};
-    FactoryType factoryType = FactoryType.CLASS_LOADER;
 
     @Override
     public BusBuilder setExceptionHandler(IEventExceptionHandler handler) {
@@ -33,12 +32,6 @@ public final class BusBuilderImpl implements BusBuilder {
     @Override
     public BusBuilder classChecker(IEventClassChecker checker) {
         this.classChecker = checker;
-        return this;
-    }
-
-    @Override
-    public BusBuilder factoryType(FactoryType type) {
-        this.factoryType = type;
         return this;
     }
 

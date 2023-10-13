@@ -47,31 +47,23 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     private final IEventClassChecker classChecker;
     private final boolean checkTypesOnDispatch;
-    private final IEventListenerFactory factory;
 
     @SuppressWarnings("unused")
     private EventBus() {
         this(new BusBuilderImpl());
     }
 
-    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch, IEventListenerFactory factory) {
+    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch) {
         if (handler == null) exceptionHandler = this;
         else exceptionHandler = handler;
         this.shutdown = startShutdown;
         this.classChecker = classChecker;
         this.checkTypesOnDispatch = checkTypesOnDispatch || checkTypesOnDispatchProperty;
-        this.factory = factory;
     }
 
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.startShutdown,
-             busBuilder.classChecker, busBuilder.checkTypesOnDispatch,
-             switch (busBuilder.factoryType) {
-                 case CLASS_LOADER -> new ClassLoaderFactory();
-                 case MOD_LAUNCHER -> new ModLauncherFactory();
-                 case METHOD_HANDLES -> new MethodHandleFactory();
-                 case LAMBDA_META_FACTORY -> new LMFListenerFactory();
-             });
+             busBuilder.classChecker, busBuilder.checkTypesOnDispatch);
     }
 
     private void registerClass(final Class<?> clazz) {
@@ -276,7 +268,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     private void register(Class<?> eventType, Object target, Method method)
     {
         try {
-            final ASMEventHandler asm = new ASMEventHandler(this.factory, target, method, IGenericEvent.class.isAssignableFrom(eventType));
+            SubscribeEventHandler asm = new SubscribeEventHandler(target, method, IGenericEvent.class.isAssignableFrom(eventType));
 
             addToListeners(target, eventType, asm, asm.getPriority());
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
@@ -297,9 +289,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         }
 
         if (eventType == Event.class) {
-            return listenerLists.computeIfAbsent(eventType, () -> new ListenerList(eventType));
+            return listenerLists.computeIfAbsent(eventType, ListenerList::new);
         } else {
-            return listenerLists.computeIfAbsent(eventType, () -> new ListenerList(eventType, getListenerList(eventType.getSuperclass())));
+            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass())));
         }
     }
 

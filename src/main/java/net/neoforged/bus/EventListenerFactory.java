@@ -2,9 +2,9 @@ package net.neoforged.bus;
 
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventListener;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
@@ -13,8 +13,11 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-public class LMFListenerFactory implements IEventListenerFactory {
-    private static final Logger LOGGER = LogManager.getLogger();
+/**
+ * Manages generation of {@link IEventListener} instances from a {@link SubscribeEvent} method,
+ * using {@link LambdaMetafactory}.
+ */
+class EventListenerFactory {
     private static final MethodHandles.Lookup IMPL_LOOKUP;
 
     private static final LockHelper<Method, MethodHandle> eventListenerFactories = LockHelper.withHashMap();
@@ -25,7 +28,10 @@ public class LMFListenerFactory implements IEventListenerFactory {
             hackfield.setAccessible(true);
             IMPL_LOOKUP = (MethodHandles.Lookup) hackfield.get(null);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to access IMPL_LOOKUP", e);
+            throw new RuntimeException("""
+        Failed to access IMPL_LOOKUP.
+        Maybe you need to add --add-opens="java.base/java.lang.invoke=net.neoforged.bus" to your JVM arguments.
+        """, e);
         }
     }
 
@@ -62,8 +68,7 @@ public class LMFListenerFactory implements IEventListenerFactory {
         });
     }
 
-    @Override
-    public IEventListener create(Method callback, Object target) {
+    public static IEventListener create(Method callback, Object target) {
         try {
             var factory = getEventListenerFactory(callback);
 

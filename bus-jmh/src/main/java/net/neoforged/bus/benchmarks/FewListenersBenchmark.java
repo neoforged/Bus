@@ -7,28 +7,28 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
-public class EventBusBenchmarkNoLoader {
+public class FewListenersBenchmark {
     // No Runtime Patching
     @Benchmark
-    public int testNoLoaderDynamic() {
+    public int testDynamic() {
         BenchmarkArmsLength.postDynamic(BenchmarkArmsLength.NoLoader);
         return 0;
     }
 
     @Benchmark
-    public int testNoLoaderLambda() {
+    public int testLambda() {
         BenchmarkArmsLength.postLambda(BenchmarkArmsLength.NoLoader);
         return 0;
     }
 
     @Benchmark
-    public int testNoLoaderStatic() {
+    public int testStatic() {
         BenchmarkArmsLength.postStatic(BenchmarkArmsLength.NoLoader);
         return 0;
     }
 
     @Benchmark
-    public int testNoLoaderCombined() {
+    public int testCombined() {
         BenchmarkArmsLength.postCombined(BenchmarkArmsLength.NoLoader);
         return 0;
     }

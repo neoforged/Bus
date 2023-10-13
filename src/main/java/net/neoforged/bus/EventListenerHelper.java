@@ -41,7 +41,7 @@ public class EventListenerHelper
         if (result != null)
             return result;
 
-        return lock.computeIfAbsent(eventClass, () -> {
+        return lock.computeIfAbsent(eventClass, e -> {
             var parent = eventClass.getSuperclass();
             return eventClass.isAnnotationPresent(annotation) || (parent != null && hasAnnotation(parent, annotation, lock));
         });

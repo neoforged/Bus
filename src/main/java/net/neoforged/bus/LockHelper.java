@@ -59,10 +59,6 @@ public class LockHelper<K,V> {
         return getReadMap().containsKey(key);
     }
 
-    public V computeIfAbsent(K key, Supplier<V> factory) {
-        return computeIfAbsent(key, k -> factory.get(), Function.identity());
-    }
-
     public V computeIfAbsent(K key, Function<K, V> factory) {
         return computeIfAbsent(key, factory, Function.identity());
     }
