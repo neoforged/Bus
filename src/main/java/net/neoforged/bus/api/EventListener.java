@@ -23,7 +23,7 @@ package net.neoforged.bus.api;
 /**
  * Event listeners are wrapped with implementations of this interface
  */
-public interface IEventListener
+public abstract class EventListener
 {
-    void invoke(Event event);
+    public abstract void invoke(Event event);
 }

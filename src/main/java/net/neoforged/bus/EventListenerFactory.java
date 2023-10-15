@@ -1,11 +1,11 @@
 package net.neoforged.bus;
 
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.IEventListener;
+import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.SubscribeEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.objectweb.asm.*;
 
+import java.lang.constant.ConstantDescs;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -13,69 +13,108 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static org.objectweb.asm.Opcodes.*;
+
 /**
- * Manages generation of {@link IEventListener} instances from a {@link SubscribeEvent} method,
+ * Manages generation of {@link EventListener} instances from a {@link SubscribeEvent} method,
  * using {@link LambdaMetafactory}.
  */
 class EventListenerFactory {
-    private static final MethodHandles.Lookup IMPL_LOOKUP;
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
+    private static final String HANDLER_DESC = Type.getInternalName(EventListener.class);
+
+    private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Event.class));
+    private static final String INSTANCE_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Object.class), Type.getType(Event.class));
+
+    private static final MethodType STATIC_HANDLER = MethodType.methodType(void.class, Event.class);
+    private static final MethodType INSTANCE_HANDLER = MethodType.methodType(void.class, Object.class, Event.class);
+
+    private static final MethodType STATIC_CONSTRUCTOR = MethodType.methodType(void.class);
+    private static final MethodType INSTANCE_CONSTRUCTOR = MethodType.methodType(void.class, Object.class);
+
+    private static final ConstantDynamic METHOD_CONSTANT = new ConstantDynamic(ConstantDescs.DEFAULT_NAME, MethodHandle.class.descriptorString(), new Handle(
+        H_INVOKESTATIC, Type.getInternalName(MethodHandles.class), "classData",
+        MethodType.methodType(Object.class, MethodHandles.Lookup.class, String.class, Class.class).descriptorString(), false
+    ));
 
     private static final LockHelper<Method, MethodHandle> eventListenerFactories = LockHelper.withHashMap();
 
-    static {
+    private static MethodHandle getEventListenerFactory(Method m) {
+        return eventListenerFactories.computeIfAbsent(m, EventListenerFactory::createWrapper0);
+    }
+
+    private static MethodHandle createWrapper0(Method callback) {
         try {
-            var hackfield = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-            hackfield.setAccessible(true);
-            IMPL_LOOKUP = (MethodHandles.Lookup) hackfield.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException("""
-        Failed to access IMPL_LOOKUP.
-        Maybe you need to add --add-opens="java.base/java.lang.invoke=net.neoforged.bus" to your JVM arguments.
-        """, e);
+            callback.setAccessible(true);
+
+            var handle = LOOKUP.unreflect(callback);
+            var isStatic = Modifier.isStatic(callback.getModifiers());
+
+            var boxedHandle = handle.asType(isStatic ? STATIC_HANDLER : INSTANCE_HANDLER);
+
+            var classBytes = makeClass(EventListenerFactory.class.getName() + "$" + callback.getName(), isStatic);
+            var classLookup = LOOKUP.defineHiddenClassWithClassData(classBytes, boxedHandle, true);
+            return classLookup.findConstructor(classLookup.lookupClass(), isStatic ? STATIC_CONSTRUCTOR : INSTANCE_CONSTRUCTOR);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to create listener", e);
         }
     }
 
-    private static final MethodType LISTENER_INVOKE = MethodType.methodType(void.class, Event.class);
+    protected static byte[] makeClass(String name, boolean isStatic) {
+        ClassWriter cv = new ClassWriter(0);
 
-    private static MethodHandle getEventListenerFactory(Method m) {
-        return eventListenerFactories.computeIfAbsent(m, callback -> {
-            try {
-                var callbackClass = callback.getDeclaringClass();
-                var lookup = IMPL_LOOKUP.in(callbackClass);
+        String desc = name.replace('.', '/');
+        cv.visit(V16, ACC_PUBLIC | ACC_FINAL, desc, null, HANDLER_DESC, null);
 
-                if (Modifier.isStatic(callback.getModifiers())) {
-                    return LambdaMetafactory.metafactory(
-                            lookup,
-                            "invoke",
-                            MethodType.methodType(IEventListener.class),
-                            LISTENER_INVOKE,
-                            lookup.unreflect(callback),
-                            MethodType.methodType(void.class, callback.getParameterTypes()[0])
-                    ).getTarget();
-                } else {
-                    return LambdaMetafactory.metafactory(
-                            lookup,
-                            "invoke",
-                            MethodType.methodType(IEventListener.class, callbackClass),
-                            LISTENER_INVOKE,
-                            lookup.unreflect(callback),
-                            MethodType.methodType(void.class, callback.getParameterTypes()[0])
-                    ).getTarget();
-                }
-            } catch (Throwable e) {
-                throw new RuntimeException("Failed to create IEventListener factory", e);
+        cv.visitSource(".dynamic", null);
+        if (!isStatic) {
+            cv.visitField(ACC_PRIVATE | ACC_FINAL, "instance", "Ljava/lang/Object;", null, null).visitEnd();
+        }
+        {
+            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "<init>", isStatic ? "()V" : "(Ljava/lang/Object;)V", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESPECIAL, HANDLER_DESC, "<init>", "()V", false);
+            if (!isStatic) {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitFieldInsn(PUTFIELD, desc, "instance", "Ljava/lang/Object;");
             }
-        });
+            mv.visitInsn(RETURN);
+            mv.visitMaxs(2, 2);
+            mv.visitEnd();
+        }
+        {
+            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "invoke", HANDLER_FUNC_DESC, null, null);
+            mv.visitCode();
+            mv.visitLdcInsn(METHOD_CONSTANT);
+            if (!isStatic) {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, desc, "instance", "Ljava/lang/Object;");
+            }
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitMethodInsn(
+                INVOKEVIRTUAL, "java/lang/invoke/MethodHandle", "invokeExact",
+                isStatic ? HANDLER_FUNC_DESC : INSTANCE_FUNC_DESC, false
+            );
+            mv.visitInsn(RETURN);
+            mv.visitMaxs(3, 2);
+            mv.visitEnd();
+        }
+        cv.visitEnd();
+
+        return cv.toByteArray();
     }
 
-    public static IEventListener create(Method callback, Object target) {
+    public static EventListener create(Method callback, Object target) {
         try {
             var factory = getEventListenerFactory(callback);
 
             if (Modifier.isStatic(callback.getModifiers())) {
-                return (IEventListener) factory.invoke();
+                return (EventListener) factory.invoke();
             } else {
-                return (IEventListener) factory.invoke(target);
+                return (EventListener) factory.invoke(target);
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to create IEventListener", e);

@@ -32,7 +32,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@link Event}.
  *
  * Use {@link IEventBus#register(Object)} to submit either an Object instance or a {@link Class} to the event bus
- * for scanning to generate callback {@link IEventListener} wrappers.
+ * for scanning to generate callback {@link EventListener} wrappers.
  *
  * The Event Bus system generates an ASM wrapper that dispatches to the marked method.
  */

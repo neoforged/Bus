@@ -21,6 +21,7 @@ package net.neoforged.bus;
 
 import net.jodah.typetools.TypeResolver;
 import net.neoforged.bus.api.*;
+import net.neoforged.bus.api.EventListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +40,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final boolean checkTypesOnDispatchProperty = Boolean.parseBoolean(System.getProperty("eventbus.checkTypesOnDispatch", "false"));
 
-    private ConcurrentHashMap<Object, List<IEventListener>> listeners = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Object, List<EventListener>> listeners = new ConcurrentHashMap<>();
     private final LockHelper<Class<?>, ListenerList> listenerLists = LockHelper.withIdentityHashMap();
     private final IEventExceptionHandler exceptionHandler;
     private volatile boolean shutdown = false;
@@ -274,7 +275,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalArgumentException(
                     "Listener for event " + eventClass + " takes an argument that is not valid for this bus", e);
         }
-        IEventListener listener = filter == null ?
+        EventListener listener = filter == null ?
                 new ConsumerEventHandler((Consumer<Event>) consumer) :
                 new ConsumerEventHandler.WithPredicate((Consumer<Event>) consumer, (Predicate<Event>) filter);
         addToListeners(consumer, eventClass, listener, priority);
@@ -286,9 +287,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         addToListeners(target, eventType, listener, listener.getPriority());
     }
 
-    private void addToListeners(final Object target, final Class<?> eventType, final IEventListener listener, final EventPriority priority) {
+    private void addToListeners(final Object target, final Class<?> eventType, final EventListener listener, final EventPriority priority) {
         getListenerList(eventType).register(priority, listener);
-        List<IEventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
+        List<EventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
         others.add(listener);
     }
 
@@ -308,11 +309,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     @Override
     public void unregister(Object object)
     {
-        List<IEventListener> list = listeners.remove(object);
+        List<EventListener> list = listeners.remove(object);
         if(list == null)
             return;
         for (ListenerList listenerList : listenerLists.getReadMap().values()) {
-            for (IEventListener listener : list) {
+            for (EventListener listener : list) {
                 listenerList.unregister(listener);
             }
         }
@@ -320,7 +321,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     @Override
     public <T extends Event> T post(T event) {
-        return post(event, (IEventListener::invoke));
+        return post(event, (EventListener::invoke));
     }
 
     @Override
@@ -341,7 +342,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             }
         }
 
-        IEventListener[] listeners = getListenerList(event.getClass()).getListeners();
+        EventListener[] listeners = getListenerList(event.getClass()).getListeners();
         int index = 0;
         try
         {
@@ -359,7 +360,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
-    public void handleException(IEventBus bus, Event event, IEventListener[] listeners, int index, Throwable throwable)
+    public void handleException(IEventBus bus, Event event, EventListener[] listeners, int index, Throwable throwable)
     {
         LOGGER.error(EVENTBUS, ()->new EventBusErrorMessage(event, index, listeners, throwable));
     }
