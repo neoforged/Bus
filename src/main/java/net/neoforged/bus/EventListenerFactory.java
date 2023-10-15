@@ -6,7 +6,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import org.objectweb.asm.*;
 
 import java.lang.constant.ConstantDescs;
-import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -17,7 +16,8 @@ import static org.objectweb.asm.Opcodes.*;
 
 /**
  * Manages generation of {@link EventListener} instances from a {@link SubscribeEvent} method,
- * using {@link LambdaMetafactory}.
+ * by generating wrapper classes using ASM and loading them with {@code defineHiddenClass}.
+ * This mechanism is the same as that used by lambdas.
  */
 class EventListenerFactory {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();

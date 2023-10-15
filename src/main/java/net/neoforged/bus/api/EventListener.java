@@ -21,7 +21,7 @@ package net.neoforged.bus.api;
 
 
 /**
- * Event listeners are wrapped with implementations of this interface
+ * Event listeners are wrapped with implementations of this class.
  */
 public abstract class EventListener
 {
