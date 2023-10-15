@@ -321,12 +321,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     @Override
     public <T extends Event> T post(T event) {
-        return post(event, (EventListener::invoke));
-    }
-
-    @Override
-    public < T extends Event> T post(T event, IEventBusInvokeDispatcher wrapper)
-    {
         if (shutdown)
         {
             throw new IllegalStateException("Attempted to post event of type " +
@@ -348,7 +342,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         {
             for (; index < listeners.length; index++)
             {
-                wrapper.invoke(listeners[index], event);
+                listeners[index].invoke(event);
             }
         }
         catch (Throwable throwable)
