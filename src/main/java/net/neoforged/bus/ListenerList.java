@@ -119,6 +119,12 @@ public class ListenerList {
         Arrays.stream(EventPriority.values()).forEach(value -> {
             ret.addAll(getListeners(value));
         });
+        unwrapListeners(ret);
+        this.listeners.set(ret.toArray(new EventListener[0]));
+        rebuild = false;
+    }
+
+    protected void unwrapListeners(List<EventListener> ret) {
         if (canUnwrapListeners) {
             for (int i = 0; i < ret.size(); ++i) {
                 if (ret.get(i) instanceof IWrapperListener wrapper) {
@@ -126,8 +132,6 @@ public class ListenerList {
                 }
             }
         }
-        this.listeners.set(ret.toArray(new EventListener[0]));
-        rebuild = false;
     }
 
     public void register(EventPriority priority, EventListener listener) {

@@ -202,5 +202,17 @@ public interface IEventBus {
      */
     <T extends Event> T post(T event);
 
+    /**
+     * Submit the event for dispatch to listeners registered with a specific {@link EventPriority}.
+     * <p>
+     * If the bus is not started yet, an exception will be thrown.
+     * <p>
+     * Note that posting events phase-by-phase is overall a lot slower than a regular {@link #post(Event)} call.
+     *
+     * @param event The event to dispatch to listeners
+     * @return the event that was passed in
+     */
+    <T extends Event> T post(EventPriority phase, T event);
+
     void start();
 }

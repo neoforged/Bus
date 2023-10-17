@@ -319,8 +319,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         }
     }
 
-    @Override
-    public <T extends Event> T post(T event) {
+    private void doPostChecks(Event event) {
         if (shutdown)
         {
             throw new IllegalStateException("Attempted to post event of type " +
@@ -335,6 +334,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                         "Cannot post event of type " + event.getClass().getSimpleName() + " to this bus", e);
             }
         }
+    }
+
+    @Override
+    public <T extends Event> T post(T event) {
+        doPostChecks(event);
 
         EventListener[] listeners = getListenerList(event.getClass()).getListeners();
         int index = 0;
@@ -348,6 +352,38 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         catch (Throwable throwable)
         {
             exceptionHandler.handleException(this, event, listeners, index, throwable);
+            throw throwable;
+        }
+        return event;
+    }
+
+    @Override
+    public <T extends Event> T post(EventPriority phase, T event) {
+        doPostChecks(event);
+
+        ListenerList listenerList = getListenerList(event.getClass());
+
+        if (listenerList.getListeners().length == 0) {
+            // This function is usually used for dispatch across many busses,
+            // so there is a chance that we don't have any listener for the event and can skip the locking and allocation.
+            return event;
+        }
+
+        // This allocates and takes a lock... Might be worth optimizing if this becomes a bottleneck.
+        List<EventListener> listeners = listenerList.getListeners(phase);
+        listenerList.unwrapListeners(listeners);
+        int index = 0;
+        try
+        {
+            for (EventListener listener : listeners)
+            {
+                listener.invoke(event);
+                index++;
+            }
+        }
+        catch (Throwable throwable)
+        {
+            exceptionHandler.handleException(this, event, listeners.toArray(EventListener[]::new), index, throwable);
             throw throwable;
         }
         return event;
