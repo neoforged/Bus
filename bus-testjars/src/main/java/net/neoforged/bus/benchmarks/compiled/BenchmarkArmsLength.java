@@ -22,27 +22,8 @@ public class BenchmarkArmsLength
             SubscriberLambda.register(combinedSubscriberBus);
             return this;
         }
-    };
-
-    public static Runnable supplier() {
-        return () -> {
-            ModLauncher = new Bus(
-                BusBuilder.builder().useModLauncher().build(),
-                BusBuilder.builder().useModLauncher().build(),
-                BusBuilder.builder().useModLauncher().build(),
-                BusBuilder.builder().useModLauncher().build()
-            ).register();
-            ClassLoader = new Bus(
-                BusBuilder.builder().build(),
-                BusBuilder.builder().build(),
-                BusBuilder.builder().build(),
-                BusBuilder.builder().build()
-            ).register();
-        };
     }
 
-    public static Bus ModLauncher;
-    public static Bus ClassLoader;
     public static Bus NoLoader = new Bus(
         BusBuilder.builder().build(),
         BusBuilder.builder().build(),

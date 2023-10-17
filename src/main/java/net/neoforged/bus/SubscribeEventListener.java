@@ -24,21 +24,21 @@ import net.neoforged.bus.api.*;
 import java.lang.reflect.*;
 import static org.objectweb.asm.Type.getMethodDescriptor;
 
-public class ASMEventHandler implements IEventListener, IWrapperListener {
-
-    private final IEventListenerFactory factory;
-    private final IEventListener handler;
+/**
+ * Wrapper around an event handler generated for a {@link SubscribeEvent} method.
+ */
+class SubscribeEventListener extends EventListener implements IWrapperListener {
+    private final EventListener handler;
     private final SubscribeEvent subInfo;
     private final boolean isGeneric;
     private String readable;
     private Type filter = null;
 
-    public ASMEventHandler(IEventListenerFactory factory, Object target, Method method, boolean isGeneric) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
-        this.factory = factory;
-        handler = this.factory.create(method, target);
+    public SubscribeEventListener(Object target, Method method, boolean isGeneric) {
+        handler = EventListenerFactory.create(method, target);
 
         subInfo = method.getAnnotation(SubscribeEvent.class);
-        readable = "ASM: " + target + " " + method.getName() + getMethodDescriptor(method);
+        readable = "@SubscribeEvent: " + target + " " + method.getName() + getMethodDescriptor(method);
         this.isGeneric = isGeneric;
         if (isGeneric)
         {
@@ -95,7 +95,7 @@ public class ASMEventHandler implements IEventListener, IWrapperListener {
     }
 
     @Override
-    public IEventListener getWithoutCheck() {
+    public EventListener getWithoutCheck() {
         return handler;
     }
 }

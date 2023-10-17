@@ -1,7 +1,7 @@
 package net.neoforged.bus;
 
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.IEventListener;
+import net.neoforged.bus.api.EventListener;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 /**
  * Wraps a consumer to be used as an event handler, and overrides {@link #toString()} for better debugging.
  */
-public class ConsumerEventHandler implements IEventListener {
+public class ConsumerEventHandler extends EventListener {
     protected final Consumer<Event> consumer;
 
     public ConsumerEventHandler(Consumer<Event> consumer) {
@@ -28,7 +28,7 @@ public class ConsumerEventHandler implements IEventListener {
 
     public static class WithPredicate extends ConsumerEventHandler implements IWrapperListener {
         private final Predicate<Event> predicate;
-        private final IEventListener withoutCheck;
+        private final EventListener withoutCheck;
 
         public WithPredicate(Consumer<Event> consumer, Predicate<Event> predicate) {
             super(consumer);
@@ -44,7 +44,7 @@ public class ConsumerEventHandler implements IEventListener {
         }
 
         @Override
-        public IEventListener getWithoutCheck() {
+        public EventListener getWithoutCheck() {
             return withoutCheck;
         }
     }

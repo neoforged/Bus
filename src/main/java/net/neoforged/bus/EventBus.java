@@ -21,18 +21,18 @@ package net.neoforged.bus;
 
 import net.jodah.typetools.TypeResolver;
 import net.neoforged.bus.api.*;
+import net.neoforged.bus.api.EventListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Type;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static net.neoforged.bus.LogMarkers.EVENTBUS;
 
@@ -40,68 +40,30 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final boolean checkTypesOnDispatchProperty = Boolean.parseBoolean(System.getProperty("eventbus.checkTypesOnDispatch", "false"));
 
-    private ConcurrentHashMap<Object, List<IEventListener>> listeners = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Object, List<EventListener>> listeners = new ConcurrentHashMap<>();
     private final LockHelper<Class<?>, ListenerList> listenerLists = LockHelper.withIdentityHashMap();
     private final IEventExceptionHandler exceptionHandler;
     private volatile boolean shutdown = false;
 
     private final IEventClassChecker classChecker;
     private final boolean checkTypesOnDispatch;
-    private final IEventListenerFactory factory;
 
     @SuppressWarnings("unused")
     private EventBus() {
         this(new BusBuilderImpl());
     }
 
-    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch, IEventListenerFactory factory) {
+    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch) {
         if (handler == null) exceptionHandler = this;
         else exceptionHandler = handler;
         this.shutdown = startShutdown;
         this.classChecker = classChecker;
         this.checkTypesOnDispatch = checkTypesOnDispatch || checkTypesOnDispatchProperty;
-        this.factory = factory;
     }
 
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.startShutdown,
-             busBuilder.classChecker, busBuilder.checkTypesOnDispatch,
-             busBuilder.modLauncher ? new ModLauncherFactory() : new ClassLoaderFactory());
-    }
-
-    private void registerClass(final Class<?> clazz) {
-        Arrays.stream(clazz.getMethods()).
-                filter(m->Modifier.isStatic(m.getModifiers())).
-                filter(m->m.isAnnotationPresent(SubscribeEvent.class)).
-                forEach(m->registerListener(clazz, m, m));
-    }
-
-    private Optional<Method> getDeclMethod(final Class<?> clz, final Method in) {
-        try {
-            return Optional.of(clz.getDeclaredMethod(in.getName(), in.getParameterTypes()));
-        } catch (NoSuchMethodException nse) {
-            return Optional.empty();
-        }
-
-    }
-    private void registerObject(final Object obj) {
-        final HashSet<Class<?>> classes = new HashSet<>();
-        typesFor(obj.getClass(), classes);
-        Arrays.stream(obj.getClass().getMethods()).
-                filter(m->!Modifier.isStatic(m.getModifiers())).
-                forEach(m -> classes.stream().
-                        map(c->getDeclMethod(c, m)).
-                        filter(rm -> rm.isPresent() && rm.get().isAnnotationPresent(SubscribeEvent.class)).
-                        findFirst().
-                        ifPresent(rm->registerListener(obj, m, rm.get())));
-    }
-
-
-    private void typesFor(final Class<?> clz, final Set<Class<?>> visited) {
-        if (clz.getSuperclass() == null) return;
-        typesFor(clz.getSuperclass(),visited);
-        Arrays.stream(clz.getInterfaces()).forEach(i->typesFor(i, visited));
-        visited.add(clz);
+             busBuilder.classChecker, busBuilder.checkTypesOnDispatch);
     }
 
     @Override
@@ -112,11 +74,67 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             return;
         }
 
-        if (target.getClass() == Class.class) {
-            registerClass((Class<?>) target);
-        } else {
-            registerObject(target);
+        boolean isStatic = target.getClass() == Class.class;
+        Class<?> clazz = isStatic ? (Class<?>) target : target.getClass();
+
+        checkSupertypes(clazz, clazz);
+
+        int foundMethods = 0;
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (!method.isAnnotationPresent(SubscribeEvent.class)) {
+                continue;
+            }
+
+            if (Modifier.isStatic(method.getModifiers()) == isStatic) {
+                registerListener(target, method, method);
+            } else {
+                if (isStatic) {
+                    throw new IllegalArgumentException("""
+                            Expected @SubscribeEvent method %s to be static
+                            because register() was called with a class type.
+                            Either make the method static, or call register() with an instance of %s.
+                            """.formatted(method, clazz));
+                } else {
+                    throw new IllegalArgumentException("""
+                            Expected @SubscribeEvent method %s to NOT be static
+                            because register() was called with an instance type.
+                            Either make the method non-static, or call register(%s.class).
+                            """.formatted(method, clazz.getSimpleName()));
+                }
+            }
+
+            ++foundMethods;
         }
+
+        if (foundMethods == 0) {
+            throw new IllegalArgumentException("""
+                    %s has no @SubscribeEvent methods, but register was called anyway.
+                    The event bus only recognizes listener methods that have the @SubscribeEvent annotation.
+                    """.formatted(clazz)
+            );
+        }
+    }
+
+    private static void checkSupertypes(Class<?> registeredType, Class<?> type) {
+        if (type == null || type == Object.class) {
+            return;
+        }
+
+        if (type != registeredType) {
+            for (var method : type.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(SubscribeEvent.class)) {
+                    throw new IllegalArgumentException("""
+                            Attempting to register a listener object of type %s,
+                            however its supertype %s has a @SubscribeEvent method: %s.
+                            This is not allowed! Only the listener object can have @SubscribeEvent methods.
+                            """.formatted(registeredType, type, method));
+                }
+            }
+        }
+
+        checkSupertypes(registeredType, type.getSuperclass());
+        Stream.of(type.getInterfaces())
+                .forEach(itf -> checkSupertypes(registeredType, itf));
     }
 
     private void registerListener(final Object target, final Method method, final Method real) {
@@ -144,11 +162,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalArgumentException(
                     "Method " + method + " has @SubscribeEvent annotation, " +
                             "but takes an argument that is not valid for this bus" + eventType, e);
-        }
-
-        if (!Modifier.isPublic(method.getModifiers()))
-        {
-            throw new IllegalArgumentException("Failed to create ASMEventHandler for " + target.getClass().getName() + "." + method.getName() + Type.getMethodDescriptor(method) + " it is not public and our transformer is disabled");
         }
 
         register(eventType, target, real);
@@ -262,7 +275,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalArgumentException(
                     "Listener for event " + eventClass + " takes an argument that is not valid for this bus", e);
         }
-        IEventListener listener = filter == null ?
+        EventListener listener = filter == null ?
                 new ConsumerEventHandler((Consumer<Event>) consumer) :
                 new ConsumerEventHandler.WithPredicate((Consumer<Event>) consumer, (Predicate<Event>) filter);
         addToListeners(consumer, eventClass, listener, priority);
@@ -270,18 +283,13 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     private void register(Class<?> eventType, Object target, Method method)
     {
-        try {
-            final ASMEventHandler asm = new ASMEventHandler(this.factory, target, method, IGenericEvent.class.isAssignableFrom(eventType));
-
-            addToListeners(target, eventType, asm, asm.getPriority());
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
-            LOGGER.error(EVENTBUS,"Error registering event handler: {} {}", eventType, method, e);
-        }
+        SubscribeEventListener listener = new SubscribeEventListener(target, method, IGenericEvent.class.isAssignableFrom(eventType));
+        addToListeners(target, eventType, listener, listener.getPriority());
     }
 
-    private void addToListeners(final Object target, final Class<?> eventType, final IEventListener listener, final EventPriority priority) {
+    private void addToListeners(final Object target, final Class<?> eventType, final EventListener listener, final EventPriority priority) {
         getListenerList(eventType).register(priority, listener);
-        List<IEventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
+        List<EventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
         others.add(listener);
     }
 
@@ -292,20 +300,20 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         }
 
         if (eventType == Event.class) {
-            return listenerLists.computeIfAbsent(eventType, () -> new ListenerList(eventType));
+            return listenerLists.computeIfAbsent(eventType, ListenerList::new);
         } else {
-            return listenerLists.computeIfAbsent(eventType, () -> new ListenerList(eventType, getListenerList(eventType.getSuperclass())));
+            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass())));
         }
     }
 
     @Override
     public void unregister(Object object)
     {
-        List<IEventListener> list = listeners.remove(object);
+        List<EventListener> list = listeners.remove(object);
         if(list == null)
             return;
         for (ListenerList listenerList : listenerLists.getReadMap().values()) {
-            for (IEventListener listener : list) {
+            for (EventListener listener : list) {
                 listenerList.unregister(listener);
             }
         }
@@ -313,12 +321,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     @Override
     public <T extends Event> T post(T event) {
-        return post(event, (IEventListener::invoke));
-    }
-
-    @Override
-    public < T extends Event> T post(T event, IEventBusInvokeDispatcher wrapper)
-    {
         if (shutdown)
         {
             throw new IllegalStateException("Attempted to post event of type " +
@@ -334,13 +336,13 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             }
         }
 
-        IEventListener[] listeners = getListenerList(event.getClass()).getListeners();
+        EventListener[] listeners = getListenerList(event.getClass()).getListeners();
         int index = 0;
         try
         {
             for (; index < listeners.length; index++)
             {
-                wrapper.invoke(listeners[index], event);
+                listeners[index].invoke(event);
             }
         }
         catch (Throwable throwable)
@@ -352,7 +354,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
-    public void handleException(IEventBus bus, Event event, IEventListener[] listeners, int index, Throwable throwable)
+    public void handleException(IEventBus bus, Event event, EventListener[] listeners, int index, Throwable throwable)
     {
         LOGGER.error(EVENTBUS, ()->new EventBusErrorMessage(event, index, listeners, throwable));
     }

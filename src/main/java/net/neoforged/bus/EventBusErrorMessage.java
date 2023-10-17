@@ -1,7 +1,7 @@
 package net.neoforged.bus;
 
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.IEventListener;
+import net.neoforged.bus.api.EventListener;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.util.StringBuilderFormattable;
 
@@ -12,10 +12,10 @@ import java.io.StringWriter;
 public class EventBusErrorMessage implements Message, StringBuilderFormattable {
     //private final Event event;
     private final int index;
-    private final IEventListener[] listeners;
+    private final EventListener[] listeners;
     private final Throwable throwable;
 
-    public EventBusErrorMessage(final Event event, final int index, final IEventListener[] listeners, final Throwable throwable) {
+    public EventBusErrorMessage(final Event event, final int index, final EventListener[] listeners, final Throwable throwable) {
         //this.event = event;
         this.index = index;
         this.listeners = listeners;

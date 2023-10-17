@@ -1,9 +1,9 @@
 package net.neoforged.bus.testjar;
 
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.IEventListener;
+import net.neoforged.bus.api.EventListener;
 
-public class TestListener implements IEventListener {
+public class TestListener extends EventListener {
     private Object instance;
 
     TestListener(Object instance) {

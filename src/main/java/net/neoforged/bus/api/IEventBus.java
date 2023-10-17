@@ -202,18 +202,5 @@ public interface IEventBus {
      */
     <T extends Event> T post(T event);
 
-    /**
-     * Submit the event for dispatch to listeners. The invoke wrapper allows for
-     * wrap handling of the actual dispatch, to allow for monitoring of individual event
-     * dispatch
-     * <p>
-     * If the bus is not started yet, an exception will be thrown.
-     *
-     * @param event The event to dispatch to listeners
-     * @param wrapper A wrapper function to handle actual dispatch
-     * @return the event that was passed in
-     */
-    <T extends Event> T post(T event, IEventBusInvokeDispatcher wrapper);
-
     void start();
 }
