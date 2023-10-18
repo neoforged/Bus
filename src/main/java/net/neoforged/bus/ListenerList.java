@@ -30,14 +30,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ListenerList {
     private boolean rebuild = true;
-    private AtomicReference<EventListener[]> listeners = new AtomicReference<>();
-    private ArrayList<ArrayList<EventListener>> priorities;
+    private final AtomicReference<EventListener[]> listeners = new AtomicReference<>();
+    private final AtomicReference<EventListener[][]> perPhaseListeners = new AtomicReference<>();
+    private final ArrayList<ArrayList<EventListener>> priorities;
     private ListenerList parent;
     private List<ListenerList> children;
-    private Semaphore writeLock = new Semaphore(1, true);
+    private final Semaphore writeLock = new Semaphore(1, true);
     private final boolean canUnwrapListeners;
+    private final boolean buildPerPhaseList;
 
-    ListenerList(Class<?> eventClass) {
+    ListenerList(Class<?> eventClass, boolean buildPerPhaseList) {
         int count = EventPriority.values().length;
         priorities = new ArrayList<>(count);
 
@@ -47,11 +49,12 @@ public class ListenerList {
 
         // Unwrap if the event is not cancellable and not generic
         canUnwrapListeners = !ICancellableEvent.class.isAssignableFrom(eventClass) && !IGenericEvent.class.isAssignableFrom(eventClass);
+        this.buildPerPhaseList = buildPerPhaseList;
     }
 
 
-    ListenerList(Class<?> eventClass, ListenerList parent) {
-        this(eventClass);
+    ListenerList(Class<?> eventClass, ListenerList parent, boolean buildPerPhaseList) {
+        this(eventClass, buildPerPhaseList);
         this.parent = parent;
         this.parent.addChild(this);
     }
@@ -65,7 +68,7 @@ public class ListenerList {
      * @param priority The Priority to get
      * @return ArrayList containing listeners
      */
-    public ArrayList<EventListener> getListeners(EventPriority priority) {
+    private ArrayList<EventListener> getListeners(EventPriority priority) {
         writeLock.acquireUninterruptibly();
         ArrayList<EventListener> ret = new ArrayList<>(priorities.get(priority.ordinal()));
         writeLock.release();
@@ -86,6 +89,15 @@ public class ListenerList {
     public EventListener[] getListeners() {
         if (shouldRebuild()) buildCache();
         return listeners.get();
+    }
+
+    public EventListener[] getPhaseListeners(EventPriority phase) {
+        if (!buildPerPhaseList) {
+            throw new IllegalStateException("buildPerPhaseList is false!");
+        }
+
+        if (shouldRebuild()) buildCache();
+        return perPhaseListeners.get()[phase.ordinal()];
     }
 
     protected boolean shouldRebuild() {
@@ -116,15 +128,25 @@ public class ListenerList {
             parent.buildCache();
         }
         ArrayList<EventListener> ret = new ArrayList<>();
-        Arrays.stream(EventPriority.values()).forEach(value -> {
-            ret.addAll(getListeners(value));
-        });
-        unwrapListeners(ret);
+        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[5][] : null;
+
+        for (EventPriority phase : EventPriority.values()) {
+            var phaseListeners = getListeners(phase);
+            unwrapListeners(phaseListeners);
+            ret.addAll(phaseListeners);
+
+            if (perPhaseListeners != null) {
+                perPhaseListeners[phase.ordinal()] = phaseListeners.toArray(EventListener[]::new);
+            }
+        }
+
         this.listeners.set(ret.toArray(new EventListener[0]));
+        this.perPhaseListeners.set(perPhaseListeners);
+
         rebuild = false;
     }
 
-    protected void unwrapListeners(List<EventListener> ret) {
+    private void unwrapListeners(List<EventListener> ret) {
         if (canUnwrapListeners) {
             for (int i = 0; i < ret.size(); ++i) {
                 if (ret.get(i) instanceof IWrapperListener wrapper) {

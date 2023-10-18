@@ -47,23 +47,25 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     private final IEventClassChecker classChecker;
     private final boolean checkTypesOnDispatch;
+    private final boolean allowPerPhasePost;
 
     @SuppressWarnings("unused")
     private EventBus() {
         this(new BusBuilderImpl());
     }
 
-    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch) {
+    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch, boolean allowPerPhasePost) {
         if (handler == null) exceptionHandler = this;
         else exceptionHandler = handler;
         this.shutdown = startShutdown;
         this.classChecker = classChecker;
         this.checkTypesOnDispatch = checkTypesOnDispatch || checkTypesOnDispatchProperty;
+        this.allowPerPhasePost = allowPerPhasePost;
     }
 
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.startShutdown,
-             busBuilder.classChecker, busBuilder.checkTypesOnDispatch);
+             busBuilder.classChecker, busBuilder.checkTypesOnDispatch, busBuilder.allowPerPhasePost);
     }
 
     @Override
@@ -300,9 +302,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         }
 
         if (eventType == Event.class) {
-            return listenerLists.computeIfAbsent(eventType, ListenerList::new);
+            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, allowPerPhasePost));
         } else {
-            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass())));
+            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass()), allowPerPhasePost));
         }
     }
 
@@ -317,6 +319,24 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                 listenerList.unregister(listener);
             }
         }
+    }
+
+    @Override
+    public <T extends Event> T post(T event) {
+        doPostChecks(event);
+
+        return post(event, getListenerList(event.getClass()).getListeners());
+    }
+
+    @Override
+    public <T extends Event> T post(EventPriority phase, T event) {
+        if (!allowPerPhasePost) {
+            throw new IllegalStateException("This bus does not allow calling phase-specific post.");
+        }
+
+        doPostChecks(event);
+
+        return post(event, getListenerList(event.getClass()).getPhaseListeners(phase));
     }
 
     private void doPostChecks(Event event) {
@@ -336,11 +356,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         }
     }
 
-    @Override
-    public <T extends Event> T post(T event) {
-        doPostChecks(event);
-
-        EventListener[] listeners = getListenerList(event.getClass()).getListeners();
+    private <T extends Event> T post(T event, EventListener[] listeners) {
         int index = 0;
         try
         {
@@ -352,38 +368,6 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         catch (Throwable throwable)
         {
             exceptionHandler.handleException(this, event, listeners, index, throwable);
-            throw throwable;
-        }
-        return event;
-    }
-
-    @Override
-    public <T extends Event> T post(EventPriority phase, T event) {
-        doPostChecks(event);
-
-        ListenerList listenerList = getListenerList(event.getClass());
-
-        if (listenerList.getListeners().length == 0) {
-            // This function is usually used for dispatch across many busses,
-            // so there is a chance that we don't have any listener for the event and can skip the locking and allocation.
-            return event;
-        }
-
-        // This allocates and takes a lock... Might be worth optimizing if this becomes a bottleneck.
-        List<EventListener> listeners = listenerList.getListeners(phase);
-        listenerList.unwrapListeners(listeners);
-        int index = 0;
-        try
-        {
-            for (EventListener listener : listeners)
-            {
-                listener.invoke(event);
-                index++;
-            }
-        }
-        catch (Throwable throwable)
-        {
-            exceptionHandler.handleException(this, event, listeners.toArray(EventListener[]::new), index, throwable);
             throw throwable;
         }
         return event;

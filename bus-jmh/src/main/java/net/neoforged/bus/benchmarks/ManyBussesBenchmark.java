@@ -20,7 +20,7 @@ public class ManyBussesBenchmark {
     public void setup() {
         // Imitate FML-like setup where most mod event busses have few listeners for a given event.
         for (int i = 0; i < BUS_COUNT; ++i) {
-            busses[i] = BusBuilder.builder().build();
+            busses[i] = BusBuilder.builder().allowPerPhasePost().build();
             if (i % 5 == 0) {
                 busses[i].addListener(TestEvent.class, event -> event.value++);
             }
