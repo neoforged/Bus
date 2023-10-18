@@ -23,5 +23,10 @@ public interface BusBuilder {
     }
     BusBuilder classChecker(IEventClassChecker checker);
 
+    /**
+     * Allow calling {@link IEventBus#post(EventPriority, Event)}.
+     */
+    BusBuilder allowPerPhasePost();
+
     IEventBus build();
 }

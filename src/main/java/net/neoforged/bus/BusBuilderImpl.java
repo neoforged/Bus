@@ -10,6 +10,7 @@ public final class BusBuilderImpl implements BusBuilder {
     boolean startShutdown = false;
     boolean checkTypesOnDispatch = false;
     IEventClassChecker classChecker = eventClass -> {};
+    boolean allowPerPhasePost = false;
 
     @Override
     public BusBuilder setExceptionHandler(IEventExceptionHandler handler) {
@@ -32,6 +33,12 @@ public final class BusBuilderImpl implements BusBuilder {
     @Override
     public BusBuilder classChecker(IEventClassChecker checker) {
         this.classChecker = checker;
+        return this;
+    }
+
+    @Override
+    public BusBuilder allowPerPhasePost() {
+        this.allowPerPhasePost = true;
         return this;
     }
 

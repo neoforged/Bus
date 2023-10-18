@@ -47,23 +47,25 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     private final IEventClassChecker classChecker;
     private final boolean checkTypesOnDispatch;
+    private final boolean allowPerPhasePost;
 
     @SuppressWarnings("unused")
     private EventBus() {
         this(new BusBuilderImpl());
     }
 
-    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch) {
+    private EventBus(final IEventExceptionHandler handler, boolean startShutdown, IEventClassChecker classChecker, boolean checkTypesOnDispatch, boolean allowPerPhasePost) {
         if (handler == null) exceptionHandler = this;
         else exceptionHandler = handler;
         this.shutdown = startShutdown;
         this.classChecker = classChecker;
         this.checkTypesOnDispatch = checkTypesOnDispatch || checkTypesOnDispatchProperty;
+        this.allowPerPhasePost = allowPerPhasePost;
     }
 
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.startShutdown,
-             busBuilder.classChecker, busBuilder.checkTypesOnDispatch);
+             busBuilder.classChecker, busBuilder.checkTypesOnDispatch, busBuilder.allowPerPhasePost);
     }
 
     @Override
@@ -307,9 +309,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         if (Modifier.isAbstract(eventType.getSuperclass().getModifiers())) {
             validateAbstractChain(eventType.getSuperclass());
 
-            return listenerLists.computeIfAbsent(eventType, ListenerList::new);
+            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, allowPerPhasePost));
         } else {
-            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass())));
+            return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass()), allowPerPhasePost));
         }
     }
 
@@ -341,6 +343,23 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     @Override
     public <T extends Event> T post(T event) {
+        doPostChecks(event);
+
+        return post(event, getListenerList(event.getClass()).getListeners());
+    }
+
+    @Override
+    public <T extends Event> T post(EventPriority phase, T event) {
+        if (!allowPerPhasePost) {
+            throw new IllegalStateException("This bus does not allow calling phase-specific post.");
+        }
+
+        doPostChecks(event);
+
+        return post(event, getListenerList(event.getClass()).getPhaseListeners(phase));
+    }
+
+    private void doPostChecks(Event event) {
         if (shutdown)
         {
             throw new IllegalStateException("Attempted to post event of type " +
@@ -355,8 +374,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                         "Cannot post event of type " + event.getClass().getSimpleName() + " to this bus", e);
             }
         }
+    }
 
-        EventListener[] listeners = getListenerList(event.getClass()).getListeners();
+    private <T extends Event> T post(T event, EventListener[] listeners) {
         int index = 0;
         try
         {
