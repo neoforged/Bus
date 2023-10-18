@@ -128,7 +128,7 @@ public class ListenerList {
             parent.buildCache();
         }
         ArrayList<EventListener> ret = new ArrayList<>();
-        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[5][] : null;
+        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[EventPriority.values().length][] : null;
 
         for (EventPriority phase : EventPriority.values()) {
             var phaseListeners = getListeners(phase);
