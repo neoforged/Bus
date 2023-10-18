@@ -7,11 +7,6 @@ import org.junit.jupiter.api.Test;
 
 public class TestNoLoader extends TestNoLoaderBase {
 
-    @Test
-    void eventHandlersCanSubscribeToAbstractEvents() {
-        doTest(new AbstractEventListenerTest() {});
-    }
-
     @RepeatedTest(10)
     public void testMultipleThreadsMultipleBus() {
         doTest(new ParallelEventTest.Multiple() {});
@@ -111,5 +106,10 @@ public class TestNoLoader extends TestNoLoaderBase {
     @Test
     public void testCommonSubscribeEventErrors() {
         doTest(new CommonSubscribeEventErrorsTest() {});
+    }
+
+    @Test
+    public void testAbstractEventClasses() {
+        doTest(new AbstractEventClassesTest() {});
     }
 }

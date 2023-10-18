@@ -28,9 +28,20 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Base Event class that all other events are derived from
+ * Base Event class that all other events are derived from.
+ *
+ * <h3>Note on abstract events</h3>
+ * Listeners cannot be registered to an abstract event class.
+ * <p>
+ * This is useful for classes that extend {@link Event} with more data and methods,
+ * but should never be listened to directly.
+ * <p>
+ * For example, an event with {@code Pre} and {@code Post} subclasses might want to
+ * be declared as {@code abstract} to prevent user accidentally listening to both.
+ * <p>
+ * All the parents of abstract event classes until {@link Event} must also be abstract.
  */
-public class Event
+public abstract class Event
 {
     /**
      * @deprecated Use a custom type and custom methods appropriate for your event,
@@ -53,7 +64,7 @@ public class Event
     boolean isCanceled = false;
     private Result result = Result.DEFAULT;
 
-    public Event() { }
+    protected Event() { }
 
     /**
      * Determines if this event expects a significant result value.

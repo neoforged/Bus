@@ -19,7 +19,7 @@ public abstract class LambdaHandlerTest implements ITestHandler {
         hit = false;
     }
 
-    public void consumeEvent(Event e) { hit = true; }
+    public void consumeEvent(BaseEvent e) { hit = true; }
     public void consumeSubEvent(SubEvent e) { hit = true; }
 
     public static class Basic extends LambdaHandlerTest {
@@ -27,13 +27,13 @@ public abstract class LambdaHandlerTest implements ITestHandler {
         public void test(Supplier<BusBuilder> builder) {
             final IEventBus iEventBus = builder.get().build();
             // Inline
-            iEventBus.addListener((Event e)-> hit = true);
-            iEventBus.post(new Event());
+            iEventBus.addListener((BaseEvent e)-> hit = true);
+            iEventBus.post(new BaseEvent());
             assertTrue(hit, "Inline Lambda was not called");
             hit = false;
             // Method reference
             iEventBus.addListener(this::consumeEvent);
-            iEventBus.post(new Event());
+            iEventBus.post(new BaseEvent());
             assertTrue(hit, "Method reference was not called");
             hit = false;
         }
@@ -48,14 +48,14 @@ public abstract class LambdaHandlerTest implements ITestHandler {
             iEventBus.post(new SubEvent());
             assertTrue(hit, "Inline was not called");
             hit = false;
-            iEventBus.post(new Event());
+            iEventBus.post(new BaseEvent());
             assertTrue(!hit, "Inline was called on root event");
             // Method Reference
             iEventBus.addListener(this::consumeSubEvent);
             iEventBus.post(new SubEvent());
             assertTrue(hit, "Method reference was not called");
             hit = false;
-            iEventBus.post(new Event());
+            iEventBus.post(new BaseEvent());
             assertTrue(!hit, "Method reference was called on root event");
         }
     }
@@ -87,7 +87,9 @@ public abstract class LambdaHandlerTest implements ITestHandler {
         });
     }
 
-    public static class SubEvent extends Event {}
+    public static class BaseEvent extends Event {}
+
+    public static class SubEvent extends BaseEvent {}
 
     public static class CancellableEvent extends Event implements ICancellableEvent {}
 }

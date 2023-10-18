@@ -288,6 +288,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     private void addToListeners(final Object target, final Class<?> eventType, final EventListener listener, final EventPriority priority) {
+        if (Modifier.isAbstract(eventType.getModifiers())) {
+            throw new IllegalArgumentException(
+                    "Cannot register listeners for abstract " + eventType +
+                    ". Register a listener to one of its subclasses instead!");
+        }
         getListenerList(eventType).register(priority, listener);
         List<EventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
         others.add(listener);
@@ -299,10 +304,25 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             return list;
         }
 
-        if (eventType == Event.class) {
+        if (Modifier.isAbstract(eventType.getSuperclass().getModifiers())) {
+            validateAbstractChain(eventType.getSuperclass());
+
             return listenerLists.computeIfAbsent(eventType, ListenerList::new);
         } else {
             return listenerLists.computeIfAbsent(eventType, e -> new ListenerList(e, getListenerList(e.getSuperclass())));
+        }
+    }
+
+    private static void validateAbstractChain(Class<?> eventType) {
+        while (eventType != Event.class) {
+            // Superclass must have the annotation
+            if (!Modifier.isAbstract(eventType.getSuperclass().getModifiers())) {
+                throw new IllegalArgumentException("Abstract event " + eventType +
+                        " has a non-abstract superclass " + eventType.getSuperclass() +
+                        ". The superclass must be made abstract.");
+            }
+
+            eventType = eventType.getSuperclass();
         }
     }
 
