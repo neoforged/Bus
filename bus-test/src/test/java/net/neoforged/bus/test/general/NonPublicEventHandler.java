@@ -27,37 +27,39 @@ public class NonPublicEventHandler implements ITestHandler {
         assertDoesNotThrow(() -> bus.register(listenerObject));
         // Post
         hit = false;
-        bus.post(new Event());
+        bus.post(new ActualEvent());
         assertTrue(hit, name + " did not behave correctly: failed to hit");
         // Unregister
         bus.unregister(listenerObject);
         // Make sure we could unregister
         hit = false;
-        bus.post(new Event());
+        bus.post(new ActualEvent());
         assertFalse(hit, name + " did not behave correctly: failed to unregister");
     }
 
+    public static class ActualEvent extends Event {}
+
     public static class PUBLIC {
         @SubscribeEvent
-        public void handler(Event e) {
+        public void handler(ActualEvent e) {
             hit = true;
         }
     }
     public static class PROTECTED {
         @SubscribeEvent
-        protected void handler(Event e) {
+        protected void handler(ActualEvent e) {
             hit = true;
         }
     }
     public static class DEFAULT {
         @SubscribeEvent
-        void handler(Event e) {
+        void handler(ActualEvent e) {
             hit = true;
         }
     }
     public static class PRIVATE {
         @SubscribeEvent
-        private void handler(Event e) {
+        private void handler(ActualEvent e) {
             hit = true;
         }
     }
