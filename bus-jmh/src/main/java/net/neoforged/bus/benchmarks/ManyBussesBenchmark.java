@@ -36,6 +36,18 @@ public class ManyBussesBenchmark {
     @Benchmark
     public int testManyBusses() {
         TestEvent testEvent = new TestEvent();
+        for (IEventBus bus : busses) {
+            bus.post(testEvent);
+        }
+        return testEvent.value;
+    }
+
+    /**
+     * This test respects listener priority across busses, {@link #testManyBusses()} does not.
+     */
+    @Benchmark
+    public int testManyBussesPerPhase() {
+        TestEvent testEvent = new TestEvent();
         for (EventPriority phase : EventPriority.values()) {
             for (IEventBus bus : busses) {
                 bus.post(phase, testEvent);

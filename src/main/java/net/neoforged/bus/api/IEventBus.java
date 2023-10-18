@@ -194,23 +194,23 @@ public interface IEventBus {
 
     /**
      * Submit the event for dispatch to appropriate listeners
-     * <p>
-     * If the bus is not started yet, an exception will be thrown.
      *
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
+     * @throws IllegalStateException if the bus is not started yet
      */
     <T extends Event> T post(T event);
 
     /**
      * Submit the event for dispatch to listeners registered with a specific {@link EventPriority}.
      * <p>
-     * If the bus is not started yet, an exception will be thrown.
-     * <p>
-     * Manually posting events phase-by-phase through this method is less performant than dispatching to all phases through a {@link #post(Event)} call. Prefer that method when per-phase dispatching is not needed.
+     * Manually posting events phase-by-phase through this method is less performant
+     * than dispatching to all phases through a {@link #post(Event)} call.
+     * Prefer that method when per-phase dispatching is not needed.
      *
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
+     * @throws IllegalStateException if the bus is not started yet
      */
     <T extends Event> T post(EventPriority phase, T event);
 
