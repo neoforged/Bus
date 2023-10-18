@@ -207,7 +207,7 @@ public interface IEventBus {
      * <p>
      * If the bus is not started yet, an exception will be thrown.
      * <p>
-     * Note that posting events phase-by-phase is overall a lot slower than a regular {@link #post(Event)} call.
+     * Manually posting events phase-by-phase through this method is less performant than dispatching to all phases through a {@link #post(Event)} call. Prefer that method when per-phase dispatching is not needed.
      *
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
