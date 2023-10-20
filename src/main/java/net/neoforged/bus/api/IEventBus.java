@@ -197,7 +197,6 @@ public interface IEventBus {
      *
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
-     * @throws IllegalStateException if the bus is not started yet
      */
     <T extends Event> T post(T event);
 
@@ -211,7 +210,6 @@ public interface IEventBus {
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
      * @throws IllegalStateException if the bus does not allow per-phase post
-     * @throws IllegalStateException if the bus is not started yet
      * @see BusBuilder#allowPerPhasePost()
      */
     <T extends Event> T post(EventPriority phase, T event);

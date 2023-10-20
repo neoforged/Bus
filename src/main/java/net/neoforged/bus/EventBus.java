@@ -343,6 +343,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     @Override
     public <T extends Event> T post(T event) {
+        if (shutdown) {
+            return event;
+        }
         doPostChecks(event);
 
         return post(event, getListenerList(event.getClass()).getListeners());
@@ -354,17 +357,15 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalStateException("This bus does not allow calling phase-specific post.");
         }
 
+        if (shutdown) {
+            return event;
+        }
         doPostChecks(event);
 
         return post(event, getListenerList(event.getClass()).getPhaseListeners(phase));
     }
 
     private void doPostChecks(Event event) {
-        if (shutdown)
-        {
-            throw new IllegalStateException("Attempted to post event of type " +
-                    event.getClass().getSimpleName() + " on a bus that was not started yet!");
-        }
         if (checkTypesOnDispatch)
         {
             try {
