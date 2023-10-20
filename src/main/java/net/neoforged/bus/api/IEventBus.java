@@ -194,6 +194,8 @@ public interface IEventBus {
 
     /**
      * Submit the event for dispatch to appropriate listeners
+     * <p>
+     * If this bus was not started yet, the event is returned without being dispatched.
      *
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
@@ -202,6 +204,8 @@ public interface IEventBus {
 
     /**
      * Submit the event for dispatch to listeners registered with a specific {@link EventPriority}.
+     * <p>
+     * If this bus was not started yet, the event is returned without being dispatched.
      * <p>
      * Manually posting events phase-by-phase through this method is less performant
      * than dispatching to all phases through a {@link #post(Event)} call.
