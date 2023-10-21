@@ -8,6 +8,7 @@ plugins {
     id 'net.neoforged.gradleutils' version '[2.0.18,)'
     id 'com.github.ben-manes.versions' version '0.42.0'
     id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
+    id 'net.neoforged.licenser' version '0.7.2' apply false
 }
 apply plugin: 'maven-publish'
 
@@ -15,7 +16,8 @@ allprojects {
     apply plugin: 'java-library'
     apply plugin: 'eclipse'
     apply plugin: 'de.jjohannes.extra-java-module-info'
-    
+    apply plugin: 'net.neoforged.licenser'
+
     group 'net.neoforged'
     java {
         toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -61,6 +63,12 @@ allprojects {
                 }
             }
         }
+    }
+
+    license {
+        header = rootProject.file("codeformat/HEADER.txt")
+        skipExistingHeaders = true
+        include '**/*.java'
     }
 }
 
