@@ -30,10 +30,7 @@ allprojects {
             url = 'https://maven.neoforged.net/'
         }
     }
-    
-    dependencies.testRuntimeOnly('org.apiguardian:apiguardian-api:1.1.2') // No idea why, but windows needs this to not explode.
-    dependencies.implementation('net.sf.jopt-simple:jopt-simple:5.0.4') // Modlauncher depends on this but doesnt do it transitivly so the tests need it explit
-    
+
     extraJavaModuleInfo {
         failOnMissingModuleInfo = false
         automaticModule('jmh-core-1.35.jar', 'jmh.core')
@@ -100,7 +97,7 @@ dependencies {
     implementation('org.ow2.asm:asm:9.2')
     implementation('org.apache.logging.log4j:log4j-api:2.17.1')
     compileOnly('org.jetbrains:annotations:23.0.0')
-    api('net.jodah:typetools:0.6.+')
+    api('net.jodah:typetools:0.6.3')
 }
 
 nexusPublishing {
