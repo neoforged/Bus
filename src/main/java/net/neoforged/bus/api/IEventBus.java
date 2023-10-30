@@ -4,10 +4,8 @@ import java.util.function.Consumer;
 
 /**
  * EventBus API.
- *
+ * <p>
  * Register for events and post events.
- *
- * Contains factory methods to construct an instance {@link #create()} and {@link #create(IEventExceptionHandler)}
  */
 public interface IEventBus {
     /**
@@ -75,7 +73,7 @@ public interface IEventBus {
      * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events.
      *
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
      */
@@ -88,7 +86,7 @@ public interface IEventBus {
      * intended to be subscribed to.
      *
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
      * @param eventType The concrete {@link Event} subclass to subscribe to
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
@@ -98,7 +96,7 @@ public interface IEventBus {
     /**
      * Add a consumer listener receiving potentially canceled events.
      *
-     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
      */
@@ -110,7 +108,7 @@ public interface IEventBus {
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
      *
-     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
      * @param eventType The concrete {@link Event} subclass to subscribe to
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link Event} subclass to listen for
@@ -152,7 +150,7 @@ public interface IEventBus {
      *
      * @param genericClassFilter A {@link Class} which the {@link GenericEvent} should be filtered for
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for
      * @param <F> The {@link Class} to filter the {@link GenericEvent} for
@@ -171,7 +169,7 @@ public interface IEventBus {
      *
      * @param genericClassFilter A {@link Class} which the {@link GenericEvent} should be filtered for
      * @param priority {@link EventPriority} for this listener
-     * @param receiveCanceled Indicate if this listener should receive events that have been {@link Cancellable} canceled
+     * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
      * @param eventType The concrete {@link GenericEvent} subclass to subscribe to
      * @param consumer Callback to invoke when a matching event is received
      * @param <T> The {@link GenericEvent} subclass to listen for

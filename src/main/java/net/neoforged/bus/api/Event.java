@@ -29,8 +29,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Base Event class that all other events are derived from.
- *
- * <h3>Note on abstract events</h3>
+ * <br>
+ * <strong>Note on abstract events</strong>
+ * <br>
  * Listeners cannot be registered to an abstract event class.
  * <p>
  * This is useful for classes that extend {@link Event} with more data and methods,

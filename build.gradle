@@ -4,8 +4,10 @@ buildscript {
     }
 }
 plugins {
+    id 'signing'
     id 'net.neoforged.gradleutils' version '[2.0.18,)'
     id 'com.github.ben-manes.versions' version '0.42.0'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
 }
 apply plugin: 'maven-publish'
 
@@ -16,7 +18,7 @@ allprojects {
     
     group 'net.neoforged'
     java {
-        toolchain.languageVersion = JavaLanguageVersion.of(16)
+        toolchain.languageVersion = JavaLanguageVersion.of(17)
         modularity.inferModulePath.set(true)
     }
     version = gradleutils.getTagOffsetVersion()
@@ -92,12 +94,23 @@ jar {
     }
 }
 java.withSourcesJar()
+java.withJavadocJar()
 
 dependencies {
     implementation('org.ow2.asm:asm:9.2')
     implementation('org.apache.logging.log4j:log4j-api:2.17.1')
     compileOnly('org.jetbrains:annotations:23.0.0')
     api('net.jodah:typetools:0.6.+')
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(System.getenv('SONATYPE_USER') ?: '')
+            password.set(System.getenv('SONATYPE_PASSWORD') ?: '')
+            nexusUrl.set(uri('https://s01.oss.sonatype.org/service/local/'))
+        }
+    }
 }
 
 publishing {
@@ -129,6 +142,8 @@ publishing {
                     developer {
                         id = 'neoforged'
                         name = 'NeoForged'
+                        email = 'contact@neoforged.net'
+                        url = 'https://github.com/NeoForged/'
                     }
                 }
             }
@@ -136,5 +151,14 @@ publishing {
     }
     repositories {
         maven gradleutils.getPublishingForgeMaven()
+    }
+}
+
+if (System.getenv('GPG_PRIVATE_KEY')) {
+    signing {
+        final signingKey = System.getenv('GPG_PRIVATE_KEY') ?: ''
+        final signingPassword = System.getenv('GPG_KEY_PASSWORD') ?: ''
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
     }
 }
