@@ -76,12 +76,11 @@ ext.sharedManifest = manifest {
         'Specification-Vendor': 'NeoForged',
         'Specification-Version': '1', // Currently version 1 of the eventbus specification
         'Implementation-Title': project.name,
-        'Implementation-Version': "${project.version}+${System.getenv("BUILD_NUMBER")?:0}+${gradleutils.gitInfo.branch}.${gradleutils.gitInfo.abbreviatedId}",
+        'Implementation-Version': "${project.version}+${gradleutils.gitInfo.branch}.${gradleutils.gitInfo.abbreviatedId}",
         'Implementation-Vendor' :'NeoForged',
         'Implementation-Timestamp': java.time.Instant.now().toString(),
         'Git-Commit': gradleutils.gitInfo.abbreviatedId,
         'Git-Branch': gradleutils.gitInfo.branch,
-        'Build-Number': "${System.getenv('BUILD_NUMBER')?:0}" 
     ] as LinkedHashMap, 'net/neoforged/bus/service/')
 }
 
