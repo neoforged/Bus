@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 /**
  * Wraps a consumer to be used as an event handler, and overrides {@link #toString()} for better debugging.
  */
-public class ConsumerEventHandler extends EventListener {
+public sealed class ConsumerEventHandler extends EventListener {
     protected final Consumer<Event> consumer;
 
     public ConsumerEventHandler(Consumer<Event> consumer) {
@@ -31,7 +31,7 @@ public class ConsumerEventHandler extends EventListener {
         return consumer.toString();
     }
 
-    public static class WithPredicate extends ConsumerEventHandler implements IWrapperListener {
+    public static final class WithPredicate extends ConsumerEventHandler implements IWrapperListener {
         private final Predicate<Event> predicate;
         private final EventListener withoutCheck;
 
