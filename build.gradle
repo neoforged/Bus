@@ -1,16 +1,21 @@
+import net.neoforged.gradleutils.PomUtilsExtension
+
 buildscript {
     dependencies {
         classpath('de.jjohannes.gradle:extra-java-module-info:0.14')
     }
 }
 plugins {
-    id 'signing'
-    id 'net.neoforged.gradleutils' version '[2.0.18,)'
+    id 'net.neoforged.gradleutils' version '3.0.0-alpha.5'
     id 'com.github.ben-manes.versions' version '0.42.0'
-    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
     id 'net.neoforged.licenser' version '0.7.2' apply false
 }
 apply plugin: 'maven-publish'
+
+gradleutils {
+    setupCentralPublishing()
+    setupSigning(signAllPublications: true)
+}
 
 allprojects {
     apply plugin: 'java-library'
@@ -23,7 +28,12 @@ allprojects {
         toolchain.languageVersion = JavaLanguageVersion.of(17)
         modularity.inferModulePath.set(true)
     }
-    version = gradleutils.getTagOffsetVersion()
+    gradleutils {
+        version {
+            branches.suffixBranch.set(true)
+        }
+    }
+    version = gradleutils.version
     
     repositories {
         mavenLocal()
@@ -73,7 +83,7 @@ allprojects {
 }
 
 changelog {
-    fromTag '7.0'
+    from '7.0'
 }
 
 logger.lifecycle('Version: ' + version)
@@ -86,7 +96,6 @@ ext.sharedManifest = manifest {
         'Implementation-Title': project.name,
         'Implementation-Version': "${project.version}+${gradleutils.gitInfo.branch}.${gradleutils.gitInfo.abbreviatedId}",
         'Implementation-Vendor' :'NeoForged',
-        'Implementation-Timestamp': java.time.Instant.now().toString(),
         'Git-Commit': gradleutils.gitInfo.abbreviatedId,
         'Git-Branch': gradleutils.gitInfo.branch,
     ] as LinkedHashMap, 'net/neoforged/bus/service/')
@@ -107,16 +116,6 @@ dependencies {
     api('net.jodah:typetools:0.6.3')
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            username.set(System.getenv('SONATYPE_USER') ?: '')
-            password.set(System.getenv('SONATYPE_PASSWORD') ?: '')
-            nexusUrl.set(uri('https://s01.oss.sonatype.org/service/local/'))
-        }
-    }
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -124,45 +123,13 @@ publishing {
             pom {
                 name = 'Bus'
                 description = 'High performance Event Bus library'
-                url = 'https://github.com/neoforged/bus'
-                scm {
-                    url = 'https://github.com/neoforged/bus'
-                    connection = 'scm:git:git://github.com/neoforged/bus.git'
-                    developerConnection = 'scm:git:git@github.com:neoforged/bus.git'
-                }
-                issueManagement {
-                    system = 'github'
-                    url = 'https://github.com/neoforged/bus/issues'
-                }
-
-                licenses {
-                    license {
-                        name = 'LGPLv2.1'
-                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'neoforged'
-                        name = 'NeoForged'
-                        email = 'contact@neoforged.net'
-                        url = 'https://github.com/NeoForged/'
-                    }
-                }
+                pomUtils.githubRepo(it, 'Bus')
+                pomUtils.neoForgedDeveloper(it)
+                pomUtils.license(it, PomUtilsExtension.License.LGPL_v2)
             }
         }
     }
     repositories {
-        maven gradleutils.getPublishingForgeMaven()
-    }
-}
-
-if (System.getenv('GPG_PRIVATE_KEY')) {
-    signing {
-        final signingKey = System.getenv('GPG_PRIVATE_KEY') ?: ''
-        final signingPassword = System.getenv('GPG_KEY_PASSWORD') ?: ''
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign publishing.publications.mavenJava
+        maven gradleutils.publishingMaven
     }
 }
