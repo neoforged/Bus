@@ -27,7 +27,7 @@ import static org.objectweb.asm.Opcodes.*;
 class EventListenerFactory {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
-    private static final String HANDLER_DESC = Type.getInternalName(EventListener.class);
+    private static final String HANDLER_DESC = Type.getInternalName(GeneratedEventListener.class);
 
     private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Event.class));
     private static final String INSTANCE_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Object.class), Type.getType(Event.class));

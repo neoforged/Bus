@@ -27,7 +27,7 @@ import static org.objectweb.asm.Type.getMethodDescriptor;
 /**
  * Wrapper around an event handler generated for a {@link SubscribeEvent} method.
  */
-class SubscribeEventListener extends EventListener implements IWrapperListener {
+public final class SubscribeEventListener extends EventListener implements IWrapperListener {
     private final EventListener handler;
     private final SubscribeEvent subInfo;
     private final boolean isGeneric;
