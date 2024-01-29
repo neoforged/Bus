@@ -9,20 +9,13 @@ import net.neoforged.bus.api.IEventBus;
 
 public class SubscriberLambda
 {
-
     public static void register(IEventBus bus)
     {
         bus.addListener(SubscriberLambda::onCancellableEvent);
-        bus.addListener(SubscriberLambda::onResultEvent);
         bus.addListener(SubscriberLambda::onSimpleEvent);
     }
 
     public static void onCancellableEvent(CancellableEvent event)
-    {
-
-    }
-
-    public static void onResultEvent(ResultEvent event)
     {
 
     }

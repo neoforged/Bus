@@ -12,6 +12,4 @@ public class DummyEvent extends Event {
     public static class GoodEvent extends DummyEvent {}
     public static class BadEvent extends DummyEvent {}
     public static class CancellableEvent extends DummyEvent implements ICancellableEvent {}
-    @HasResult
-    public static class ResultEvent extends DummyEvent {}
 }

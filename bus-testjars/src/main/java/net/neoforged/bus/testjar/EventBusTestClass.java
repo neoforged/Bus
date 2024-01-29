@@ -26,12 +26,6 @@ public class EventBusTestClass {
     }
 
     @SubscribeEvent
-    public void evtMethod4(DummyEvent.ResultEvent evt) {
-
-    }
-
-
-    @SubscribeEvent
     public void badEventMethod(DummyEvent.BadEvent evt) {
         throw new RuntimeException("BARF");
     }
