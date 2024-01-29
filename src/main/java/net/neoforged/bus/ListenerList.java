@@ -22,7 +22,6 @@ package net.neoforged.bus;
 import net.neoforged.bus.api.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -47,8 +46,8 @@ public class ListenerList {
             priorities.add(new ArrayList<>());
         }
 
-        // Unwrap if the event is not cancellable and not generic
-        canUnwrapListeners = !ICancellableEvent.class.isAssignableFrom(eventClass) && !IGenericEvent.class.isAssignableFrom(eventClass);
+        // Unwrap if the event is not cancellable
+        canUnwrapListeners = !ICancellableEvent.class.isAssignableFrom(eventClass);
         this.buildPerPhaseList = buildPerPhaseList;
     }
 
