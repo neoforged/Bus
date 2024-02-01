@@ -64,7 +64,6 @@ public class BenchmarkArmsLength
     private static void postAll(IEventBus bus)
     {
         bus.post(new CancellableEvent());
-        bus.post(new ResultEvent());
         bus.post(new EventWithData("Foo", 5, true)); //Some example data
     }
 }

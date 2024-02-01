@@ -30,56 +30,23 @@ import static org.objectweb.asm.Type.getMethodDescriptor;
 public final class SubscribeEventListener extends EventListener implements IWrapperListener {
     private final EventListener handler;
     private final SubscribeEvent subInfo;
-    private final boolean isGeneric;
     private String readable;
-    private Type filter = null;
 
-    public SubscribeEventListener(Object target, Method method, boolean isGeneric) {
+    public SubscribeEventListener(Object target, Method method) {
         handler = EventListenerFactory.create(method, target);
 
         subInfo = method.getAnnotation(SubscribeEvent.class);
         readable = "@SubscribeEvent: " + target + " " + method.getName() + getMethodDescriptor(method);
-        this.isGeneric = isGeneric;
-        if (isGeneric)
-        {
-            Type type = method.getGenericParameterTypes()[0];
-            if (type instanceof ParameterizedType)
-            {
-                filter = ((ParameterizedType)type).getActualTypeArguments()[0];
-                if (filter instanceof ParameterizedType) // Unlikely that nested generics will ever be relevant for event filtering, so discard them
-                {
-                    filter = ((ParameterizedType)filter).getRawType();
-                }
-                else if (filter instanceof WildcardType)
-                {
-                    // If there's a wildcard filter of Object.class, then remove the filter.
-                    final WildcardType wfilter = (WildcardType) filter;
-                    if (wfilter.getUpperBounds().length == 1 && wfilter.getUpperBounds()[0] == Object.class && wfilter.getLowerBounds().length == 0) {
-                        filter = null;
-                    }
-                }
-            }
-        }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void invoke(Event event)
     {
         if (handler != null)
         {
-            if (isGeneric)
-            {
-                if (filter == null || filter == ((IGenericEvent)event).getGenericType()) {
-                    if (!(event instanceof ICancellableEvent cancellableEvent) || !cancellableEvent.isCanceled()) {
-                        handler.invoke(event);
-                    }
-                }
-            } else {
-                // The cast is safe because the check is removed if the event is not cancellable
-                if (!((ICancellableEvent) event).isCanceled()) {
-                    handler.invoke(event);
-                }
+            // The cast is safe because the check is removed if the event is not cancellable
+            if (!((ICancellableEvent) event).isCanceled()) {
+                handler.invoke(event);
             }
         }
     }

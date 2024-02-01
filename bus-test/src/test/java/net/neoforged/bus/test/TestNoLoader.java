@@ -89,21 +89,6 @@ public class TestNoLoader extends TestNoLoaderBase {
     }
 
     @Test
-    public void testGenericListener() {
-        doTest(new GenericListenerTests.Basic() {});
-    }
-
-    @Test
-    public void testGenericListenerRegisteredIncorrectly() {
-        doTest(new GenericListenerTests.IncorrectRegistration() {});
-    }
-
-    @Test
-    public void testGenericListenerWildcard() {
-        doTest(new GenericListenerTests.Wildcard() {});
-    }
-
-    @Test
     public void testNonPublicEventHandler() {
         doTest(new NonPublicEventHandler() {});
     }
