@@ -45,7 +45,7 @@ public final class SubscribeEventListener extends EventListener implements IWrap
         if (handler != null)
         {
             // The cast is safe because the check is removed if the event is not cancellable
-            if (!((ICancellableEvent) event).isCanceled()) {
+            if (subInfo.receiveCanceled() || !((ICancellableEvent) event).isCanceled()) {
                 handler.invoke(event);
             }
         }
