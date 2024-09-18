@@ -99,6 +99,11 @@ public class TestNoLoader extends TestNoLoaderBase {
     }
 
     @Test
+    public void testCancelledEvent() {
+        doTest(new CancelledEventTest() {});
+    }
+
+    @Test
     public void testAbstractEventClasses() {
         doTest(new AbstractEventClassesTest() {});
     }
