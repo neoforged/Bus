@@ -41,4 +41,5 @@ tasks.register('jmh', JavaExec).configure {
     args    'net.neoforged.bus.benchmarks.ManyBussesBenchmark'
     args    'net.neoforged.bus.benchmarks.ManyListenersBenchmark'
     args    'net.neoforged.bus.benchmarks.ManyDifferentListenersBenchmark'
+    args    'net.neoforged.bus.benchmarks.ListenerRebuildBenchmark'
 }
