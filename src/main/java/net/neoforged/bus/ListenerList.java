@@ -24,19 +24,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.ICancellableEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class ListenerList {
     private boolean rebuild = true;
     private final AtomicReference<EventListener[]> listeners = new AtomicReference<>();
     private final AtomicReference<EventListener[][]> perPhaseListeners = new AtomicReference<>();
     private final ArrayList<ArrayList<EventListener>> priorities;
-    private ListenerList parent;
+    @Nullable
+    private final ListenerList parent;
     private List<ListenerList> children;
     private final Semaphore writeLock = new Semaphore(1, true);
     private final boolean canUnwrapListeners;
     private final boolean buildPerPhaseList;
 
     ListenerList(Class<?> eventClass, boolean buildPerPhaseList) {
+        this(eventClass, null, buildPerPhaseList);
+    }
+
+    ListenerList(Class<?> eventClass, @Nullable ListenerList parent, boolean buildPerPhaseList) {
         int count = EventPriority.values().length;
         priorities = new ArrayList<>(count);
 
@@ -47,12 +53,11 @@ public class ListenerList {
         // Unwrap if the event is not cancellable
         canUnwrapListeners = !ICancellableEvent.class.isAssignableFrom(eventClass);
         this.buildPerPhaseList = buildPerPhaseList;
-    }
 
-    ListenerList(Class<?> eventClass, ListenerList parent, boolean buildPerPhaseList) {
-        this(eventClass, buildPerPhaseList);
         this.parent = parent;
-        this.parent.addChild(this);
+        if (parent != null) {
+            parent.addChild(this);
+        }
     }
 
     /**

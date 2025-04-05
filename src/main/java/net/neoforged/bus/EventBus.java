@@ -45,7 +45,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final boolean checkTypesOnDispatchProperty = Boolean.parseBoolean(System.getProperty("eventbus.checkTypesOnDispatch", "false"));
 
-    private ConcurrentHashMap<Object, List<EventListener>> listeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Object, List<EventListener>> listeners = new ConcurrentHashMap<>();
     private final LockHelper<Class<?>, ListenerList> listenerLists = LockHelper.withIdentityHashMap();
     private final IEventExceptionHandler exceptionHandler;
     private volatile boolean shutdown = false;

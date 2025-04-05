@@ -31,7 +31,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 public final class SubscribeEventListener extends EventListener implements IWrapperListener {
     private final EventListener handler;
     private final SubscribeEvent subInfo;
-    private String readable;
+    private final String readable;
 
     public SubscribeEventListener(Object target, Method method) {
         handler = EventListenerFactory.create(method, target);
@@ -54,6 +54,7 @@ public final class SubscribeEventListener extends EventListener implements IWrap
         return subInfo.priority();
     }
 
+    @Override
     public String toString() {
         return readable;
     }
