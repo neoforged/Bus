@@ -27,6 +27,8 @@ import net.neoforged.bus.api.ICancellableEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class ListenerList {
+    private static final EventPriority[] PRIORITIES = EventPriority.values();
+
     private boolean rebuild = true;
     private final AtomicReference<EventListener[]> listeners = new AtomicReference<>();
     private final AtomicReference<EventListener[][]> perPhaseListeners = new AtomicReference<>();
@@ -43,7 +45,7 @@ public class ListenerList {
     }
 
     ListenerList(Class<?> eventClass, @Nullable ListenerList parent, boolean buildPerPhaseList) {
-        int count = EventPriority.values().length;
+        int count = PRIORITIES.length;
         priorities = new ArrayList<>(count);
 
         for (int x = 0; x < count; x++) {
@@ -129,9 +131,9 @@ public class ListenerList {
             parent.buildCache();
         }
         ArrayList<EventListener> ret = new ArrayList<>();
-        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[EventPriority.values().length][] : null;
+        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[PRIORITIES.length][] : null;
 
-        for (EventPriority phase : EventPriority.values()) {
+        for (EventPriority phase : PRIORITIES) {
             var phaseListeners = getListeners(phase);
             unwrapListeners(phaseListeners);
             ret.addAll(phaseListeners);
