@@ -16,8 +16,11 @@ public interface BusBuilder {
     }
 
     BusBuilder setExceptionHandler(IEventExceptionHandler handler);
+
     BusBuilder startShutdown();
+
     BusBuilder checkTypesOnDispatch();
+
     default BusBuilder markerType(Class<?> markerInterface) {
         if (!markerInterface.isInterface()) throw new IllegalArgumentException("Cannot specify a class marker type");
         return classChecker(eventType -> {
@@ -26,6 +29,7 @@ public interface BusBuilder {
             }
         });
     }
+
     BusBuilder classChecker(IEventClassChecker checker);
 
     /**

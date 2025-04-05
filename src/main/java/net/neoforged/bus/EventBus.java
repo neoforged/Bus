@@ -1,40 +1,45 @@
 /*
  * Minecraft Forge
  * Copyright (c) 2016.
- *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation version 2.1
  * of the License.
- *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package net.neoforged.bus;
 
-import net.jodah.typetools.TypeResolver;
-import net.neoforged.bus.api.*;
-import net.neoforged.bus.api.EventListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
+import static net.neoforged.bus.LogMarkers.EVENTBUS;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import static net.neoforged.bus.LogMarkers.EVENTBUS;
+import net.jodah.typetools.TypeResolver;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventListener;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.IEventClassChecker;
+import net.neoforged.bus.api.IEventExceptionHandler;
+import net.neoforged.bus.api.SubscribeEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class EventBus implements IEventExceptionHandler, IEventBus {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -65,14 +70,12 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     public EventBus(final BusBuilderImpl busBuilder) {
         this(busBuilder.exceptionHandler, busBuilder.startShutdown,
-             busBuilder.classChecker, busBuilder.checkTypesOnDispatch, busBuilder.allowPerPhasePost);
+                busBuilder.classChecker, busBuilder.checkTypesOnDispatch, busBuilder.allowPerPhasePost);
     }
 
     @Override
-    public void register(final Object target)
-    {
-        if (listeners.containsKey(target))
-        {
+    public void register(final Object target) {
+        if (listeners.containsKey(target)) {
             return;
         }
 
@@ -112,8 +115,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalArgumentException("""
                     %s has no @SubscribeEvent methods, but register was called anyway.
                     The event bus only recognizes listener methods that have the @SubscribeEvent annotation.
-                    """.formatted(clazz)
-            );
+                    """.formatted(clazz));
         }
     }
 
@@ -141,19 +143,16 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     private void registerListener(final Object target, final Method method, final Method real) {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes.length != 1)
-        {
+        if (parameterTypes.length != 1) {
             throw new IllegalArgumentException(
                     "Method " + method + " has @SubscribeEvent annotation. " +
-                    "It has " + parameterTypes.length + " arguments, " +
-                    "but event handler methods require a single argument only."
-            );
+                            "It has " + parameterTypes.length + " arguments, " +
+                            "but event handler methods require a single argument only.");
         }
 
         Class<?> eventType = parameterTypes[0];
 
-        if (!Event.class.isAssignableFrom(eventType))
-        {
+        if (!Event.class.isAssignableFrom(eventType)) {
             throw new IllegalArgumentException(
                     "Method " + method + " has @SubscribeEvent annotation, " +
                             "but takes an argument that is not an Event subtype : " + eventType);
@@ -163,7 +162,8 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "Method " + method + " has @SubscribeEvent annotation, " +
-                            "but takes an argument that is not valid for this bus" + eventType, e);
+                            "but takes an argument that is not valid for this bus" + eventType,
+                    e);
         }
 
         register(eventType, target, real);
@@ -218,7 +218,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     @SuppressWarnings("unchecked")
     private <T extends Event> Class<T> getEventClass(Consumer<T> consumer) {
         final Class<T> eventClass = (Class<T>) TypeResolver.resolveRawArgument(Consumer.class, consumer.getClass());
-        if ((Class<?>)eventClass == TypeResolver.Unknown.class) {
+        if ((Class<?>) eventClass == TypeResolver.Unknown.class) {
             LOGGER.error(EVENTBUS, "Failed to resolve handler for \"{}\"", consumer.toString());
             throw new IllegalStateException("Failed to resolve consumer event type: " + consumer.toString());
         }
@@ -228,7 +228,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     private <T extends Event> void addListener(final EventPriority priority, @Nullable Predicate<? super T> filter, final Consumer<T> consumer) {
         Class<T> eventClass = getEventClass(consumer);
         if (Objects.equals(eventClass, Event.class))
-            LOGGER.warn(EVENTBUS,"Attempting to add a Lambda listener with computed generic type of Event. " +
+            LOGGER.warn(EVENTBUS, "Attempting to add a Lambda listener with computed generic type of Event. " +
                     "Are you sure this is what you meant? NOTE : there are complex lambda forms where " +
                     "the generic type information is erased and cannot be recovered at runtime.");
         addListener(priority, filter, eventClass, consumer);
@@ -241,14 +241,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             throw new IllegalArgumentException(
                     "Listener for event " + eventClass + " takes an argument that is not valid for this bus", e);
         }
-        EventListener listener = filter == null ?
-                new ConsumerEventHandler((Consumer<Event>) consumer) :
-                new ConsumerEventHandler.WithPredicate((Consumer<Event>) consumer, (Predicate<Event>) filter);
+        EventListener listener = filter == null ? new ConsumerEventHandler((Consumer<Event>) consumer) : new ConsumerEventHandler.WithPredicate((Consumer<Event>) consumer, (Predicate<Event>) filter);
         addToListeners(consumer, eventClass, listener, priority);
     }
 
-    private void register(Class<?> eventType, Object target, Method method)
-    {
+    private void register(Class<?> eventType, Object target, Method method) {
         SubscribeEventListener listener = new SubscribeEventListener(target, method);
         addToListeners(target, eventType, listener, listener.getPriority());
     }
@@ -257,7 +254,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
         if (Modifier.isAbstract(eventType.getModifiers())) {
             throw new IllegalArgumentException(
                     "Cannot register listeners for abstract " + eventType +
-                    ". Register a listener to one of its subclasses instead!");
+                            ". Register a listener to one of its subclasses instead!");
         }
         getListenerList(eventType).register(priority, listener);
         List<EventListener> others = listeners.computeIfAbsent(target, k -> Collections.synchronizedList(new ArrayList<>()));
@@ -293,10 +290,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
-    public void unregister(Object object)
-    {
+    public void unregister(Object object) {
         List<EventListener> list = listeners.remove(object);
-        if(list == null)
+        if (list == null)
             return;
         for (ListenerList listenerList : listenerLists.getReadMap().values()) {
             for (EventListener listener : list) {
@@ -330,8 +326,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     private void doPostChecks(Event event) {
-        if (checkTypesOnDispatch)
-        {
+        if (checkTypesOnDispatch) {
             try {
                 classChecker.check(event.getClass());
             } catch (IllegalArgumentException e) {
@@ -343,15 +338,11 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
 
     private <T extends Event> T post(T event, EventListener[] listeners) {
         int index = 0;
-        try
-        {
-            for (; index < listeners.length; index++)
-            {
+        try {
+            for (; index < listeners.length; index++) {
                 listeners[index].invoke(event);
             }
-        }
-        catch (Throwable throwable)
-        {
+        } catch (Throwable throwable) {
             exceptionHandler.handleException(this, event, listeners, index, throwable);
             throw throwable;
         }
@@ -359,9 +350,8 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
     }
 
     @Override
-    public void handleException(IEventBus bus, Event event, EventListener[] listeners, int index, Throwable throwable)
-    {
-        LOGGER.error(EVENTBUS, ()->new EventBusErrorMessage(event, index, listeners, throwable));
+    public void handleException(IEventBus bus, Event event, EventListener[] listeners, int index, Throwable throwable) {
+        LOGGER.error(EVENTBUS, () -> new EventBusErrorMessage(event, index, listeners, throwable));
     }
 
     @Override

@@ -1,31 +1,29 @@
 /*
  * Minecraft Forge
  * Copyright (c) 2016.
- *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation version 2.1
  * of the License.
- *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package net.neoforged.bus;
-
-import net.neoforged.bus.api.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
+import net.neoforged.bus.api.EventListener;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.ICancellableEvent;
 
 public class ListenerList {
     private boolean rebuild = true;
@@ -50,7 +48,6 @@ public class ListenerList {
         canUnwrapListeners = !ICancellableEvent.class.isAssignableFrom(eventClass);
         this.buildPerPhaseList = buildPerPhaseList;
     }
-
 
     ListenerList(Class<?> eventClass, ListenerList parent, boolean buildPerPhaseList) {
         this(eventClass, buildPerPhaseList);

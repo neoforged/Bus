@@ -1,20 +1,17 @@
 /*
  * Minecraft Forge
  * Copyright (c) 2016.
- *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation version 2.1
  * of the License.
- *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package net.neoforged.bus.api;
@@ -34,12 +31,12 @@ public interface IEventBus {
      * Depending on what is passed as an argument, different listener creation behaviour is performed.
      *
      * <dl>
-     *     <dt>Object Instance</dt>
-     *     <dd>Scanned for <em>non-static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
-     *     each method found.</dd>
-     *     <dt>Class Instance</dt>
-     *     <dd>Scanned for <em>static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
-     *     each method found.</dd>
+     * <dt>Object Instance</dt>
+     * <dd>Scanned for <em>non-static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
+     * each method found.</dd>
+     * <dt>Class Instance</dt>
+     * <dd>Scanned for <em>static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
+     * each method found.</dd>
      * </dl>
      *
      * @param target Either a {@link Class} instance or an arbitrary object, for scanning and event listener creation
@@ -50,7 +47,7 @@ public interface IEventBus {
      * Add a consumer listener with default {@link EventPriority#NORMAL} and not recieving canceled events.
      *
      * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param <T>      The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(Consumer<T> consumer);
 
@@ -61,8 +58,8 @@ public interface IEventBus {
      * intended to be subscribed to.
      *
      * @param eventType The concrete {@link Event} subclass to subscribe to
-     * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param consumer  Callback to invoke when a matching event is received
+     * @param <T>       The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(Class<T> eventType, Consumer<T> consumer);
 
@@ -71,7 +68,7 @@ public interface IEventBus {
      *
      * @param priority {@link EventPriority} for this listener
      * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param <T>      The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(EventPriority priority, Consumer<T> consumer);
 
@@ -81,20 +78,20 @@ public interface IEventBus {
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
      *
-     * @param priority {@link EventPriority} for this listener
+     * @param priority  {@link EventPriority} for this listener
      * @param eventType The concrete {@link Event} subclass to subscribe to
-     * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param consumer  Callback to invoke when a matching event is received
+     * @param <T>       The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(EventPriority priority, Class<T> eventType, Consumer<T> consumer);
 
     /**
      * Add a consumer listener with the specified {@link EventPriority} and potentially canceled events.
      *
-     * @param priority {@link EventPriority} for this listener
+     * @param priority        {@link EventPriority} for this listener
      * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
-     * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param consumer        Callback to invoke when a matching event is received
+     * @param <T>             The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(EventPriority priority, boolean receiveCanceled, Consumer<T> consumer);
 
@@ -104,11 +101,11 @@ public interface IEventBus {
      * Use this method when one of the other methods fails to determine the concrete {@link Event} subclass that is
      * intended to be subscribed to.
      *
-     * @param priority {@link EventPriority} for this listener
+     * @param priority        {@link EventPriority} for this listener
      * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
-     * @param eventType The concrete {@link Event} subclass to subscribe to
-     * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param eventType       The concrete {@link Event} subclass to subscribe to
+     * @param consumer        Callback to invoke when a matching event is received
+     * @param <T>             The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(EventPriority priority, boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
 
@@ -116,8 +113,8 @@ public interface IEventBus {
      * Add a consumer listener receiving potentially canceled events.
      *
      * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
-     * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param consumer        Callback to invoke when a matching event is received
+     * @param <T>             The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(boolean receiveCanceled, Consumer<T> consumer);
 
@@ -128,9 +125,9 @@ public interface IEventBus {
      * intended to be subscribed to.
      *
      * @param receiveCanceled Indicate if this listener should receive events that have been {@link ICancellableEvent} canceled
-     * @param eventType The concrete {@link Event} subclass to subscribe to
-     * @param consumer Callback to invoke when a matching event is received
-     * @param <T> The {@link Event} subclass to listen for
+     * @param eventType       The concrete {@link Event} subclass to subscribe to
+     * @param consumer        Callback to invoke when a matching event is received
+     * @param <T>             The {@link Event} subclass to listen for
      */
     <T extends Event> void addListener(boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer);
 

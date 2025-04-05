@@ -1,31 +1,27 @@
 /*
  * Minecraft Forge
  * Copyright (c) 2016.
- *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation version 2.1
  * of the License.
- *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package net.neoforged.bus;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventListener;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.util.StringBuilderFormattable;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 @SuppressWarnings("serial")
 public class EventBusErrorMessage implements Message, StringBuilderFormattable {
@@ -63,12 +59,8 @@ public class EventBusErrorMessage implements Message, StringBuilderFormattable {
 
     @Override
     public void formatTo(final StringBuilder buffer) {
-        buffer.
-                append("Exception caught during firing event: ").append(throwable.getMessage()).append('\n').
-                append("\tIndex: ").append(index).append('\n').
-                append("\tListeners:\n");
-        for (int x = 0; x < listeners.length; x++)
-        {
+        buffer.append("Exception caught during firing event: ").append(throwable.getMessage()).append('\n').append("\tIndex: ").append(index).append('\n').append("\tListeners:\n");
+        for (int x = 0; x < listeners.length; x++) {
             buffer.append("\t\t").append(x).append(": ").append(listeners[x]).append('\n');
         }
         final StringWriter sw = new StringWriter();

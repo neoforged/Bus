@@ -5,21 +5,18 @@
 
 package net.neoforged.bus;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
 /*
- *
  * Helper class that should be faster then ConcurrentHashMap,
  * yet still manages to properly deal with many threads.
  */
-public class LockHelper<K,V> {
+public class LockHelper<K, V> {
     public static <K, V> LockHelper<K, V> withHashMap() {
         // convert size to capacity according to default load factor
         return new LockHelper<>(size -> new HashMap<>((size + 2) * 4 / 3));

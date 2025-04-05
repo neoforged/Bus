@@ -5,10 +5,17 @@
 
 package net.neoforged.bus;
 
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventListener;
-import net.neoforged.bus.api.SubscribeEvent;
-import org.objectweb.asm.*;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.V16;
 
 import java.lang.constant.ConstantDescs;
 import java.lang.invoke.MethodHandle;
@@ -16,8 +23,13 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import static org.objectweb.asm.Opcodes.*;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventListener;
+import net.neoforged.bus.api.SubscribeEvent;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Type;
 
 /**
  * Manages generation of {@link EventListener} instances from a {@link SubscribeEvent} method,
@@ -38,10 +50,7 @@ class EventListenerFactory {
     private static final MethodType STATIC_CONSTRUCTOR = MethodType.methodType(void.class);
     private static final MethodType INSTANCE_CONSTRUCTOR = MethodType.methodType(void.class, Object.class);
 
-    private static final ConstantDynamic METHOD_CONSTANT = new ConstantDynamic(ConstantDescs.DEFAULT_NAME, MethodHandle.class.descriptorString(), new Handle(
-        H_INVOKESTATIC, Type.getInternalName(MethodHandles.class), "classData",
-        MethodType.methodType(Object.class, MethodHandles.Lookup.class, String.class, Class.class).descriptorString(), false
-    ));
+    private static final ConstantDynamic METHOD_CONSTANT = new ConstantDynamic(ConstantDescs.DEFAULT_NAME, MethodHandle.class.descriptorString(), new Handle(H_INVOKESTATIC, Type.getInternalName(MethodHandles.class), "classData", MethodType.methodType(Object.class, MethodHandles.Lookup.class, String.class, Class.class).descriptorString(), false));
 
     private static final LockHelper<Method, MethodHandle> eventListenerFactories = LockHelper.withHashMap();
 
@@ -77,7 +86,7 @@ class EventListenerFactory {
             cv.visitField(ACC_PRIVATE | ACC_FINAL, "instance", "Ljava/lang/Object;", null, null).visitEnd();
         }
         {
-            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "<init>", isStatic ? "()V" : "(Ljava/lang/Object;)V", null, null);
+            var mv = cv.visitMethod(ACC_PUBLIC, "<init>", isStatic ? "()V" : "(Ljava/lang/Object;)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitMethodInsn(INVOKESPECIAL, HANDLER_DESC, "<init>", "()V", false);
@@ -91,7 +100,7 @@ class EventListenerFactory {
             mv.visitEnd();
         }
         {
-            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "invoke", HANDLER_FUNC_DESC, null, null);
+            var mv = cv.visitMethod(ACC_PUBLIC, "invoke", HANDLER_FUNC_DESC, null, null);
             mv.visitCode();
             mv.visitLdcInsn(METHOD_CONSTANT);
             if (!isStatic) {
@@ -99,10 +108,7 @@ class EventListenerFactory {
                 mv.visitFieldInsn(GETFIELD, desc, "instance", "Ljava/lang/Object;");
             }
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(
-                INVOKEVIRTUAL, "java/lang/invoke/MethodHandle", "invokeExact",
-                isStatic ? HANDLER_FUNC_DESC : INSTANCE_FUNC_DESC, false
-            );
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/invoke/MethodHandle", "invokeExact", isStatic ? HANDLER_FUNC_DESC : INSTANCE_FUNC_DESC, false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(3, 2);
             mv.visitEnd();
