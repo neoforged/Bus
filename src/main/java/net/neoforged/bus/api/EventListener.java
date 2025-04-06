@@ -18,12 +18,18 @@ package net.neoforged.bus.api;
 
 import net.neoforged.bus.ConsumerEventHandler;
 import net.neoforged.bus.GeneratedEventListener;
+import net.neoforged.bus.IWrapperListener;
 import net.neoforged.bus.SubscribeEventListener;
 
 /**
  * Event listeners are wrapped with implementations of this class.
  */
-public abstract sealed class EventListener
+public abstract sealed class EventListener implements IWrapperListener
         permits ConsumerEventHandler, GeneratedEventListener, SubscribeEventListener {
     public abstract void invoke(Event event);
+
+    @Override
+    public EventListener getWithoutCheck() {
+        return null;
+    }
 }

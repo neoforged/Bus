@@ -152,8 +152,9 @@ public class ListenerList {
     private void unwrapListeners(List<EventListener> ret) {
         if (canUnwrapListeners) {
             for (int i = 0; i < ret.size(); ++i) {
-                if (ret.get(i) instanceof IWrapperListener wrapper) {
-                    ret.set(i, wrapper.getWithoutCheck());
+                var unwrapped = ret.get(i).getWithoutCheck();
+                if (unwrapped != null) {
+                    ret.set(i, unwrapped);
                 }
             }
         }
