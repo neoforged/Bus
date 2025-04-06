@@ -11,11 +11,11 @@ import org.openjdk.jmh.annotations.State;
 public class ListenerRebuildBenchmark {
 
     @Benchmark
-    public int testOneThousandRebuilds() {
+    public int testOneHundredRebuilds() {
         final IEventBus bus = BusBuilder.builder().build();
 
         int i = 0;
-        for (; i < 1000; i++) {
+        for (; i < 100; i++) {
             bus.addListener(SomeEvent.class, ev -> {});
             bus.post(SomeEvent.INSTANCE);
         }
@@ -23,11 +23,11 @@ public class ListenerRebuildBenchmark {
     }
 
     @Benchmark
-    public int testTenThousandRebuilds() {
+    public int testOneThousandRebuilds() {
         final IEventBus bus = BusBuilder.builder().build();
 
         int i = 0;
-        for (; i < 10_000; i++) {
+        for (; i < 1000; i++) {
             bus.addListener(SomeEvent.class, ev -> {});
             bus.post(SomeEvent.INSTANCE);
         }
