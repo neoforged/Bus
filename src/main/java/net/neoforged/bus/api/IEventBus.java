@@ -20,6 +20,7 @@
 package net.neoforged.bus.api;
 
 import java.util.function.Consumer;
+import java.lang.reflect.Method;
 
 /**
  * EventBus API.
@@ -28,8 +29,8 @@ import java.util.function.Consumer;
  */
 public interface IEventBus {
     /**
-     * Register an instance object or a Class, and add listeners for all {@link SubscribeEvent} annotated methods
-     * found there.
+     * Register an instance object or a {@linkplain Class}, and add listeners for all {@link SubscribeEvent} annotated methods
+     * found there, or directly a {@linkplain Method} annotated with {@link SubscribeEvent}.
      *
      * Depending on what is passed as an argument, different listener creation behaviour is performed.
      *
@@ -37,12 +38,16 @@ public interface IEventBus {
      *     <dt>Object Instance</dt>
      *     <dd>Scanned for <em>non-static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
      *     each method found.</dd>
-     *     <dt>Class Instance</dt>
+     *     <dt>{@linkplain Class} Instance</dt>
      *     <dd>Scanned for <em>static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
      *     each method found.</dd>
+     *     <dt>{@linkplain Method} Instance</dt>
+     *     <dd>Expects a static method annotated with {@link SubscribeEvent} which will be registered as a listener for the {@linkplain Event}
+     *     type it has as its sole parameter.</dd>
      * </dl>
      *
      * @param target Either a {@link Class} instance or an arbitrary object, for scanning and event listener creation
+     *               or a {@linkplain Method}
      */
     void register(Object target);
 
@@ -141,7 +146,7 @@ public interface IEventBus {
      *
      * NOTE: Consumers can be stored in a variable if unregistration is required for the Consumer.
      *
-     * @param object The object, {@link Class} or {@link Consumer} to unsubscribe.
+     * @param object The object, {@linkplain Class}, {@linkplain Method} or {@link Consumer} to unsubscribe.
      */
     void unregister(Object object);
 
