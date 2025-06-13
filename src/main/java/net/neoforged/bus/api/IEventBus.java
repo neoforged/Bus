@@ -146,7 +146,7 @@ public interface IEventBus {
      *
      * NOTE: Consumers can be stored in a variable if unregistration is required for the Consumer.
      *
-     * @param object The object, {@linkplain Class}, {@linkplain Method} or {@link Consumer} to unsubscribe.
+     * @param object The object, {@linkplain Class}, {@linkplain Method} or {@linkplain Consumer} to unsubscribe.
      */
     void unregister(Object object);
 
