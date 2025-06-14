@@ -5,15 +5,16 @@
 
 package net.neoforged.bus;
 
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventListener;
-
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventListener;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Wraps a consumer to be used as an event handler, and overrides {@link #toString()} for better debugging.
  */
+@ApiStatus.Internal
 public sealed class ConsumerEventHandler extends EventListener {
     protected final Consumer<Event> consumer;
 

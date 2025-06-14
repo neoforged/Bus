@@ -8,7 +8,9 @@ buildscript {
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.gradleutils' version '4.1.0'
+    id 'dev.lukebemish.immaculate' version '0.1.8'
+    id 'net.neoforged.gradleutils' version "$gradleutils_version"
+    id 'net.neoforged.gradleutils.immaculate' version "$gradleutils_version"
     id 'net.neoforged.licenser' version '0.7.2' apply false
     id 'net.neoforged.jarcompatibilitychecker' version '0.1.13'
 }
