@@ -16,8 +16,8 @@
 
 package net.neoforged.bus.api;
 
-import java.util.function.Consumer;
 import java.lang.reflect.Method;
+import java.util.function.Consumer;
 
 /**
  * EventBus API.
@@ -32,15 +32,15 @@ public interface IEventBus {
      * Depending on what is passed as an argument, different listener creation behaviour is performed.
      *
      * <dl>
-     *     <dt>Object Instance</dt>
-     *     <dd>Scanned for <em>non-static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
-     *     each method found.</dd>
-     *     <dt>{@linkplain Class} Instance</dt>
-     *     <dd>Scanned for <em>static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
-     *     each method found.</dd>
-     *     <dt>{@linkplain Method} Instance</dt>
-     *     <dd>Expects a static method annotated with {@link SubscribeEvent} which will be registered as a listener for the {@linkplain Event}
-     *     type it has as its sole parameter.</dd>
+     * <dt>Object Instance</dt>
+     * <dd>Scanned for <em>non-static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
+     * each method found.</dd>
+     * <dt>{@linkplain Class} Instance</dt>
+     * <dd>Scanned for <em>static</em> methods annotated with {@link SubscribeEvent} and creates listeners for
+     * each method found.</dd>
+     * <dt>{@linkplain Method} Instance</dt>
+     * <dd>Expects a static method annotated with {@link SubscribeEvent} which will be registered as a listener for the {@linkplain Event}
+     * type it has as its sole parameter.</dd>
      * </dl>
      *
      * @param target Either a {@link Class} instance or an arbitrary object, for scanning and event listener creation
