@@ -73,6 +73,10 @@ allprojects {
         skipExistingHeaders = true
         include '**/*.java'
     }
+
+    javadoc {
+        options.addBooleanOption('Xdoclint:none', true)
+    }
 }
 
 changelog {
