@@ -9,10 +9,12 @@ import net.neoforged.bus.api.BusBuilder;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.IEventClassChecker;
 import net.neoforged.bus.api.IEventExceptionHandler;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * BusBuilder Implementation, public for BusBuilder.builder() only, don't use this directly.
  */
+@ApiStatus.Internal
 public final class BusBuilderImpl implements BusBuilder {
     IEventExceptionHandler exceptionHandler;
     boolean startShutdown = false;

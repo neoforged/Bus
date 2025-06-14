@@ -24,8 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.ICancellableEvent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Internal
 public class ListenerList {
     private static final EventPriority[] PRIORITIES = EventPriority.values();
 

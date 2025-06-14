@@ -24,19 +24,25 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to subscribe a method to an {@link Event}
- *
+ * <p>
  * This annotation can only be applied to single parameter methods, where the single parameter is a subclass of
  * {@link Event}.
- *
+ * <p>
  * Use {@link IEventBus#register(Object)} to submit either an Object instance or a {@link Class} to the event bus
  * for scanning to generate callback {@link EventListener} wrappers.
- *
+ * <p>
  * The Event Bus system generates an ASM wrapper that dispatches to the marked method.
  */
 @Retention(value = RUNTIME)
 @Target(value = METHOD)
 public @interface SubscribeEvent {
+    /**
+     * {@return the priority to subscribe this listener with}
+     */
     EventPriority priority() default EventPriority.NORMAL;
 
+    /**
+     * {@return whether this listener should receive cancelled events}
+     */
     boolean receiveCanceled() default false;
 }

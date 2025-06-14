@@ -166,6 +166,7 @@ public interface IEventBus {
      * than dispatching to all phases through a {@link #post(Event)} call.
      * Prefer that method when per-phase dispatching is not needed.
      *
+     * @param phase The priority phase to post this event for
      * @param event The event to dispatch to listeners
      * @return the event that was passed in
      * @throws IllegalStateException if the bus does not allow per-phase post
@@ -173,5 +174,9 @@ public interface IEventBus {
      */
     <T extends Event> T post(EventPriority phase, T event);
 
+    /**
+     * Start this bus (if it was {@linkplain BusBuilder#startShutdown() created shut down}), making it able to
+     * post events to listeners.
+     */
     void start();
 }

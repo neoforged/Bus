@@ -24,10 +24,12 @@ import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.bus.api.SubscribeEvent;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Wrapper around an event handler generated for a {@link SubscribeEvent} method.
  */
+@ApiStatus.Internal
 public final class SubscribeEventListener extends EventListener implements IWrapperListener {
     private final EventListener handler;
     private final SubscribeEvent subInfo;

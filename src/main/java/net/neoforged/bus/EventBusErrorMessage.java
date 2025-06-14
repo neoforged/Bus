@@ -22,8 +22,9 @@ import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventListener;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.util.StringBuilderFormattable;
+import org.jetbrains.annotations.ApiStatus;
 
-@SuppressWarnings("serial")
+@ApiStatus.Internal
 public class EventBusErrorMessage implements Message, StringBuilderFormattable {
     //private final Event event;
     private final int index;

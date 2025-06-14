@@ -16,6 +16,11 @@
 
 package net.neoforged.bus.api;
 
+/**
+ * Handler for exceptions occurred in event listeners.
+ * 
+ * @see BusBuilder#setExceptionHandler(IEventExceptionHandler)
+ */
 public interface IEventExceptionHandler {
     /**
      * Fired when a EventListener throws an exception for the specified event on the event bus.

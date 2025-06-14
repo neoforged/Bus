@@ -10,12 +10,14 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-/*
+/**
  * Helper class that should be faster then ConcurrentHashMap,
  * yet still manages to properly deal with many threads.
  */
+@ApiStatus.Internal
 public class LockHelper<K, V> {
     public static <K, V> LockHelper<K, V> withHashMap() {
         // convert size to capacity according to default load factor
