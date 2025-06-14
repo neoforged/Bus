@@ -94,6 +94,11 @@ public class TestNoLoader extends TestNoLoaderBase {
     }
 
     @Test
+    public void testMethodEventHandler() {
+        doTest(new MethodEventHandlerTest() {});
+    }
+
+    @Test
     public void testCommonSubscribeEventErrors() {
         doTest(new CommonSubscribeEventErrorsTest() {});
     }

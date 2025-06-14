@@ -6,14 +6,20 @@ buildscript {
     }
 }
 plugins {
+    id 'java-library'
+    id 'maven-publish'
     id 'net.neoforged.gradleutils' version '4.1.0'
     id 'net.neoforged.licenser' version '0.7.2' apply false
+    id 'net.neoforged.jarcompatibilitychecker' version '0.1.13'
 }
-apply plugin: 'maven-publish'
 
 gradleutils {
     setupCentralPublishing()
     setupSigning(signAllPublications: true)
+}
+
+checkJarCompatibility {
+    isAPI = true
 }
 
 allprojects {
@@ -66,6 +72,10 @@ allprojects {
         header = rootProject.file("codeformat/HEADER.txt")
         skipExistingHeaders = true
         include '**/*.java'
+    }
+
+    javadoc {
+        options.addBooleanOption('Xdoclint:none', true)
     }
 }
 
