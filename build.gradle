@@ -6,18 +6,21 @@ buildscript {
     }
 }
 plugins {
+    id 'java-library'
+    id 'maven-publish'
     id 'net.neoforged.gradleutils' version "$gradleutils_version"
-    id 'com.github.ben-manes.versions' version '0.42.0'
-    id 'net.neoforged.licenser' version '0.7.2' apply false
-
-    id 'dev.lukebemish.immaculate' version '0.1.8'
     id 'net.neoforged.gradleutils.immaculate' version "$gradleutils_version"
+    id 'net.neoforged.licenser' version '0.7.2' apply false
+    id 'net.neoforged.jarcompatibilitychecker' version '0.1.13'
 }
-apply plugin: 'maven-publish'
 
 gradleutils {
     setupCentralPublishing()
     setupSigning(signAllPublications: true)
+}
+
+checkJarCompatibility {
+    isAPI = true
 }
 
 allprojects {
@@ -52,18 +55,6 @@ allprojects {
         automaticModule('jopt-simple-5.0.4.jar', 'jopt.simple') // TODO: Update ModLauncher to use jopt 6.0-alpha-3+, which sets the module name to 'joptsimple'
     }
     
-    def isNonStable = { String version ->
-        def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { type -> version.toUpperCase().contains(type) }
-        def regex = /^[0-9,.v-]+(-r)?$/
-        return !stableKeyword && !(version ==~ regex)
-    }
-
-    dependencyUpdates {
-        rejectVersionIf {
-            isNonStable(it.candidate.version)
-        }
-    }
-    
     // Hack eclipse into knowing that the gradle deps are modules
     eclipse {
         classpath {
@@ -82,6 +73,10 @@ allprojects {
         header = rootProject.file("codeformat/HEADER.txt")
         skipExistingHeaders = true
         include '**/*.java'
+    }
+
+    javadoc {
+        options.addBooleanOption('Xdoclint:none', true)
     }
 }
 

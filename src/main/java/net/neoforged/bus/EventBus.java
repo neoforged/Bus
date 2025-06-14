@@ -79,8 +79,23 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             return;
         }
 
-        boolean isStatic = target.getClass() == Class.class;
-        Class<?> clazz = isStatic ? (Class<?>) target : target.getClass();
+        Class<?> type = target.getClass();
+        if (type == Method.class) {
+            var method = (Method) target;
+            if (!Modifier.isStatic(method.getModifiers())) {
+                throw new IllegalArgumentException("register() was called with a Method that is not static: " + method);
+            }
+            if (!method.isAnnotationPresent(SubscribeEvent.class)) {
+                throw new IllegalArgumentException("register() was called with a Method that is not annotated with @SubscribeEvent: " + method);
+            }
+
+            registerListener(method, method);
+
+            return;
+        }
+
+        boolean isStatic = type == Class.class;
+        Class<?> clazz = isStatic ? (Class<?>) target : type;
 
         checkSupertypes(clazz, clazz);
 
@@ -91,7 +106,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
             }
 
             if (Modifier.isStatic(method.getModifiers()) == isStatic) {
-                registerListener(target, method, method);
+                registerListener(target, method);
             } else {
                 if (isStatic) {
                     throw new IllegalArgumentException("""
@@ -141,7 +156,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                 .forEach(itf -> checkSupertypes(registeredType, itf));
     }
 
-    private void registerListener(final Object target, final Method method, final Method real) {
+    private void registerListener(final Object target, final Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length != 1) {
             throw new IllegalArgumentException(
@@ -166,7 +181,7 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                     e);
         }
 
-        register(eventType, target, real);
+        register(eventType, target, method);
     }
 
     @Nullable
