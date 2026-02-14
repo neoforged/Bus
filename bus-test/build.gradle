@@ -2,8 +2,9 @@
 dependencies {
     implementation(rootProject)
     implementation(project(':bus-testjars'))
-    implementation('org.junit.jupiter:junit-jupiter-api:5.8.+')
-    implementation('org.junit.jupiter:junit-jupiter-engine:5.8.+')
+    implementation(platform('org.junit:junit-bom:5.14.2'))
+    implementation('org.junit.jupiter:junit-jupiter')
+    implementation('org.junit.platform:junit-platform-launcher')
     implementation('org.apache.logging.log4j:log4j-core:2.17.1')
     testCompileOnly('org.jetbrains:annotations:23.0.0')
     testRuntimeOnly('org.apiguardian:apiguardian-api:1.1.2')

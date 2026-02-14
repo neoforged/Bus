@@ -16,8 +16,6 @@
 
 package net.neoforged.bus;
 
-import static org.objectweb.asm.Type.getMethodDescriptor;
-
 import java.lang.reflect.Method;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventListener;
@@ -39,7 +37,7 @@ public final class SubscribeEventListener extends EventListener implements IWrap
         handler = EventListenerFactory.create(method, target);
 
         subInfo = method.getAnnotation(SubscribeEvent.class);
-        readable = "@SubscribeEvent: " + target + " " + method.getName() + getMethodDescriptor(method);
+        readable = "@SubscribeEvent: " + target + ": " + method;
     }
 
     @Override
