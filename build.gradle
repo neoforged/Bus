@@ -11,7 +11,7 @@ plugins {
     id 'dev.lukebemish.immaculate' version '0.1.8'
     id 'net.neoforged.gradleutils' version "$gradleutils_version"
     id 'net.neoforged.gradleutils.immaculate' version "$gradleutils_version"
-    id 'net.neoforged.licenser' version '0.7.2' apply false
+    id 'net.neoforged.licenser' version '0.7.5' apply false
     id 'net.neoforged.jarcompatibilitychecker' version '0.1.13'
 }
 
@@ -32,7 +32,7 @@ allprojects {
 
     group 'net.neoforged'
     java {
-        toolchain.languageVersion = JavaLanguageVersion.of(17)
+        toolchain.languageVersion = JavaLanguageVersion.of(25)
         modularity.inferModulePath.set(true)
     }
     gradleutils {
@@ -87,32 +87,27 @@ changelog {
 
 logger.lifecycle('Version: ' + version)
 
-ext.sharedManifest = manifest {
-    attributes([
-        'Specification-Title': 'Bus',
-        'Specification-Vendor': 'NeoForged',
-        'Specification-Version': '1', // Currently version 1 of the eventbus specification
-        'Implementation-Title': project.name,
-        'Implementation-Version': "${project.version}+${gradleutils.gitInfo.branch}.${gradleutils.gitInfo.abbreviatedId}",
-        'Implementation-Vendor' :'NeoForged',
-        'Git-Commit': gradleutils.gitInfo.abbreviatedId,
-        'Git-Branch': gradleutils.gitInfo.branch,
-    ] as LinkedHashMap, 'net/neoforged/bus/service/')
-}
-
 jar {
-    manifest = project.manifest {
-        from sharedManifest
+    manifest {
+        attributes([
+                'Specification-Title': 'Bus',
+                'Specification-Vendor': 'NeoForged',
+                'Specification-Version': '1', // Currently version 1 of the eventbus specification
+                'Implementation-Title': project.name,
+                'Implementation-Version': "${project.version}+${gradleutils.gitInfo.branch}.${gradleutils.gitInfo.abbreviatedId}",
+                'Implementation-Vendor' :'NeoForged',
+                'Git-Commit': gradleutils.gitInfo.abbreviatedId,
+                'Git-Branch': gradleutils.gitInfo.branch,
+        ] as LinkedHashMap, 'net/neoforged/bus/service/')
     }
 }
 java.withSourcesJar()
 java.withJavadocJar()
 
 dependencies {
-    implementation('org.ow2.asm:asm:9.2')
     implementation('org.apache.logging.log4j:log4j-api:2.17.1')
     compileOnly('org.jetbrains:annotations:23.0.0')
-    api('net.jodah:typetools:0.6.3')
+    implementation('net.jodah:typetools:0.6.3')
 }
 
 publishing {

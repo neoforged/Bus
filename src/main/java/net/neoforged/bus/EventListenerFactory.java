@@ -5,31 +5,30 @@
 
 package net.neoforged.bus;
 
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
-import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.Opcodes.V16;
+import static java.lang.classfile.ClassFile.ACC_FINAL;
+import static java.lang.classfile.ClassFile.ACC_PRIVATE;
+import static java.lang.classfile.ClassFile.ACC_PUBLIC;
+import static java.lang.constant.ConstantDescs.BSM_CLASS_DATA;
+import static java.lang.constant.ConstantDescs.CD_MethodHandle;
+import static java.lang.constant.ConstantDescs.CD_Object;
+import static java.lang.constant.ConstantDescs.DEFAULT_NAME;
+import static java.lang.constant.ConstantDescs.MTD_void;
 
-import java.lang.constant.ConstantDescs;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.attribute.SourceFileAttribute;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.AccessFlag;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
+
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.SubscribeEvent;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.ConstantDynamic;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Type;
 
 /**
  * Manages generation of {@link EventListener} instances from a {@link SubscribeEvent} method,
@@ -39,18 +38,16 @@ import org.objectweb.asm.Type;
 class EventListenerFactory {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
-    private static final String HANDLER_DESC = Type.getInternalName(GeneratedEventListener.class);
-
-    private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Event.class));
-    private static final String INSTANCE_FUNC_DESC = Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Object.class), Type.getType(Event.class));
+    private static final ClassDesc CD_GeneratedEventListener = ClassDesc.of(GeneratedEventListener.class.getName());
 
     private static final MethodType STATIC_HANDLER = MethodType.methodType(void.class, Event.class);
     private static final MethodType INSTANCE_HANDLER = MethodType.methodType(void.class, Object.class, Event.class);
 
+    private static final MethodTypeDesc MTD_STATIC_HANDLER = STATIC_HANDLER.describeConstable().orElseThrow();
+    private static final MethodTypeDesc MTD_INSTANCE_HANDLER = INSTANCE_HANDLER.describeConstable().orElseThrow();
+
     private static final MethodType STATIC_CONSTRUCTOR = MethodType.methodType(void.class);
     private static final MethodType INSTANCE_CONSTRUCTOR = MethodType.methodType(void.class, Object.class);
-
-    private static final ConstantDynamic METHOD_CONSTANT = new ConstantDynamic(ConstantDescs.DEFAULT_NAME, MethodHandle.class.descriptorString(), new Handle(H_INVOKESTATIC, Type.getInternalName(MethodHandles.class), "classData", MethodType.methodType(Object.class, MethodHandles.Lookup.class, String.class, Class.class).descriptorString(), false));
 
     private static final LockHelper<Method, MethodHandle> eventListenerFactories = LockHelper.withHashMap();
 
@@ -64,58 +61,53 @@ class EventListenerFactory {
 
             var handle = LOOKUP.unreflect(callback);
             var isStatic = Modifier.isStatic(callback.getModifiers());
+            var ctorType = isStatic ? STATIC_CONSTRUCTOR : INSTANCE_CONSTRUCTOR;
 
             var boxedHandle = handle.asType(isStatic ? STATIC_HANDLER : INSTANCE_HANDLER);
 
-            var classBytes = makeClass(EventListenerFactory.class.getName() + "$" + callback.getName(), isStatic);
+            var classBytes = makeClass(EventListenerFactory.class.getName() + "$" + callback.getName(), isStatic, ctorType);
             var classLookup = LOOKUP.defineHiddenClassWithClassData(classBytes, boxedHandle, true);
-            return classLookup.findConstructor(classLookup.lookupClass(), isStatic ? STATIC_CONSTRUCTOR : INSTANCE_CONSTRUCTOR);
+            return classLookup.findConstructor(classLookup.lookupClass(), ctorType);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to create listener", e);
         }
     }
 
-    protected static byte[] makeClass(String name, boolean isStatic) {
-        ClassWriter cv = new ClassWriter(0);
+    protected static byte[] makeClass(String name, boolean isStatic, MethodType ctorType) {
+        var classDesc = ClassDesc.of(name);
+        return ClassFile.of().build(classDesc, clb -> {
+            clb.withFlags(AccessFlag.PUBLIC, AccessFlag.FINAL)
+                    .withSuperclass(CD_GeneratedEventListener)
+                    .with(SourceFileAttribute.of(".dynamic"));
 
-        String desc = name.replace('.', '/');
-        cv.visit(V16, ACC_PUBLIC | ACC_FINAL, desc, null, HANDLER_DESC, null);
-
-        cv.visitSource(".dynamic", null);
-        if (!isStatic) {
-            cv.visitField(ACC_PRIVATE | ACC_FINAL, "instance", "Ljava/lang/Object;", null, null).visitEnd();
-        }
-        {
-            var mv = cv.visitMethod(ACC_PUBLIC, "<init>", isStatic ? "()V" : "(Ljava/lang/Object;)V", null, null);
-            mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, HANDLER_DESC, "<init>", "()V", false);
             if (!isStatic) {
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitFieldInsn(PUTFIELD, desc, "instance", "Ljava/lang/Object;");
+                clb.withField("instance", CD_Object, ACC_PRIVATE | ACC_FINAL);
             }
-            mv.visitInsn(RETURN);
-            mv.visitMaxs(2, 2);
-            mv.visitEnd();
-        }
-        {
-            var mv = cv.visitMethod(ACC_PUBLIC, "invoke", HANDLER_FUNC_DESC, null, null);
-            mv.visitCode();
-            mv.visitLdcInsn(METHOD_CONSTANT);
-            if (!isStatic) {
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, desc, "instance", "Ljava/lang/Object;");
-            }
-            mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/invoke/MethodHandle", "invokeExact", isStatic ? HANDLER_FUNC_DESC : INSTANCE_FUNC_DESC, false);
-            mv.visitInsn(RETURN);
-            mv.visitMaxs(3, 2);
-            mv.visitEnd();
-        }
-        cv.visitEnd();
-
-        return cv.toByteArray();
+            clb.withMethodBody("<init>", ctorType.describeConstable().orElseThrow(), ACC_PUBLIC, cob -> {
+                cob.aload(0);
+                cob.invokespecial(CD_GeneratedEventListener, "<init>", MTD_void);
+                if (!isStatic) {
+                    cob.aload(0);
+                    cob.aload(1);
+                    cob.putfield(ClassDesc.of(name), "instance", CD_Object);
+                }
+                cob.return_();
+            });
+            clb.withMethodBody("invoke", MTD_STATIC_HANDLER, ACC_PUBLIC, cob -> {
+                var cp = cob.constantPool();
+                cob.ldc(
+                        cp.constantDynamicEntry(
+                                cp.bsmEntry(BSM_CLASS_DATA, List.of()),
+                                cp.nameAndTypeEntry(DEFAULT_NAME, CD_MethodHandle)));
+                if (!isStatic) {
+                    cob.aload(0);
+                    cob.getfield(ClassDesc.of(name), "instance", CD_Object);
+                }
+                cob.aload(1);
+                cob.invokevirtual(CD_MethodHandle, "invokeExact", isStatic ? MTD_STATIC_HANDLER : MTD_INSTANCE_HANDLER);
+                cob.return_();
+            });
+        });
     }
 
     public static EventListener create(Method callback, Object target) {
