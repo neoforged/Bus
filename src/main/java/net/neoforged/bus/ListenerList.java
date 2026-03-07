@@ -18,9 +18,10 @@ package net.neoforged.bus;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicReference;
 import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.ICancellableEvent;
@@ -28,13 +29,13 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-public class ListenerList {
+public final class ListenerList {
     private static final EventPriority[] PRIORITIES = EventPriority.values();
+    private static final EventListener[][] EMPTY_PER_PHASE_LISTENERS = new EventListener[0][0];
 
-    private boolean rebuild = true;
-    private final AtomicReference<EventListener[]> listeners = new AtomicReference<>();
-    private final AtomicReference<EventListener[][]> perPhaseListeners = new AtomicReference<>();
-    private final ArrayList<ArrayList<EventListener>> priorities;
+    private volatile EventListener[] listeners = null;
+    private volatile EventListener[][] perPhaseListeners = null;
+    private final ArrayList<Set<EventListener>> priorities;
     @Nullable
     private final ListenerList parent;
     private List<ListenerList> children;
@@ -51,7 +52,7 @@ public class ListenerList {
         priorities = new ArrayList<>(count);
 
         for (int x = 0; x < count; x++) {
-            priorities.add(new ArrayList<>());
+            priorities.add(new HashSet<>());
         }
 
         // Unwrap if the event is not cancellable
@@ -92,8 +93,8 @@ public class ListenerList {
      * Automatically rebuilds the internal Array cache if its information is out of date.
      */
     public EventListener[] getListeners() {
-        if (shouldRebuild()) buildCache();
-        return listeners.get();
+        if (listeners == null) buildCache();
+        return listeners;
     }
 
     public EventListener[] getPhaseListeners(EventPriority phase) {
@@ -101,16 +102,17 @@ public class ListenerList {
             throw new IllegalStateException("buildPerPhaseList is false!");
         }
 
-        if (shouldRebuild()) buildCache();
-        return perPhaseListeners.get()[phase.ordinal()];
+        if (perPhaseListeners == null) buildCache();
+        return perPhaseListeners[phase.ordinal()];
     }
 
-    protected boolean shouldRebuild() {
-        return rebuild;
+    private boolean shouldRebuild() {
+        return listeners == null || perPhaseListeners == null;
     }
 
-    protected void forceRebuild() {
-        this.rebuild = true;
+    private void forceRebuild() {
+        this.listeners = null;
+        this.perPhaseListeners = null;
         if (this.children != null) {
             synchronized (this.children) {
                 for (ListenerList child : this.children)
@@ -133,22 +135,20 @@ public class ListenerList {
             parent.buildCache();
         }
         ArrayList<EventListener> ret = new ArrayList<>();
-        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[PRIORITIES.length][] : null;
+        EventListener[][] perPhaseListeners = buildPerPhaseList ? new EventListener[PRIORITIES.length][] : EMPTY_PER_PHASE_LISTENERS;
 
         for (EventPriority phase : PRIORITIES) {
             var phaseListeners = getListeners(phase);
             unwrapListeners(phaseListeners);
             ret.addAll(phaseListeners);
 
-            if (perPhaseListeners != null) {
+            if (perPhaseListeners != EMPTY_PER_PHASE_LISTENERS) {
                 perPhaseListeners[phase.ordinal()] = phaseListeners.toArray(EventListener[]::new);
             }
         }
 
-        this.listeners.set(ret.toArray(new EventListener[0]));
-        this.perPhaseListeners.set(perPhaseListeners);
-
-        rebuild = false;
+        this.listeners = ret.toArray(new EventListener[0]);
+        this.perPhaseListeners = perPhaseListeners;
     }
 
     private void unwrapListeners(List<EventListener> ret) {
@@ -170,7 +170,13 @@ public class ListenerList {
 
     public void unregister(EventListener listener) {
         writeLock.acquireUninterruptibly();
-        priorities.stream().filter(list -> list.remove(listener)).forEach(list -> this.forceRebuild());
+        boolean rebuild = false;
+        for (Set<EventListener> list : priorities) {
+            if (list.remove(listener)) {
+                rebuild = true;
+            }
+        }
+        if (rebuild) this.forceRebuild();
         writeLock.release();
     }
 }
