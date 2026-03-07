@@ -18,7 +18,7 @@ package net.neoforged.bus;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
@@ -52,7 +52,7 @@ public final class ListenerList {
         priorities = new ArrayList<>(count);
 
         for (int x = 0; x < count; x++) {
-            priorities.add(new HashSet<>());
+            priorities.add(new LinkedHashSet<>());
         }
 
         // Unwrap if the event is not cancellable
