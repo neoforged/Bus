@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import net.neoforged.bus.api.EventListener;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.ICancellableEvent;
@@ -52,7 +54,7 @@ public final class ListenerList {
         priorities = new ArrayList<>(count);
 
         for (int x = 0; x < count; x++) {
-            priorities.add(new LinkedHashSet<>());
+            priorities.add(new ReferenceLinkedOpenHashSet<>());
         }
 
         // Unwrap if the event is not cancellable
@@ -93,8 +95,9 @@ public final class ListenerList {
      * Automatically rebuilds the internal Array cache if its information is out of date.
      */
     public EventListener[] getListeners() {
-        if (listeners == null) buildCache();
-        return listeners;
+        var listeners = this.listeners;
+        if (listeners != null) listeners;
+        return buildCache().left();
     }
 
     public EventListener[] getPhaseListeners(EventPriority phase) {
@@ -102,8 +105,9 @@ public final class ListenerList {
             throw new IllegalStateException("buildPerPhaseList is false!");
         }
 
-        if (perPhaseListeners == null) buildCache();
-        return perPhaseListeners[phase.ordinal()];
+        var perPhaseListeners = this.perPhaseListeners;
+        if (perPhaseListeners != null) perPhaseListeners[phase.ordinal()];
+        return buildCache().right()[phase.ordinal()];
     }
 
     private boolean shouldRebuild() {
@@ -130,7 +134,7 @@ public final class ListenerList {
     /**
      * Rebuild the local Array of listeners, returns early if there is no work to do.
      */
-    private void buildCache() {
+    private Pair<EventListener[], EventListener[][]> buildCache() {
         if (parent != null && parent.shouldRebuild()) {
             parent.buildCache();
         }
@@ -147,8 +151,10 @@ public final class ListenerList {
             }
         }
 
-        this.listeners = ret.toArray(new EventListener[0]);
+        var listeners = ret.toArray(new EventListener[0]);
+        this.listeners = listeners;
         this.perPhaseListeners = perPhaseListeners;
+        return Pair.of(listeners, perPhaseListeners);
     }
 
     private void unwrapListeners(List<EventListener> ret) {
